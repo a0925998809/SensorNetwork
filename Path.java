@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.text.DecimalFormat;
 
 public class Path {
     private ArrayList<Integer> path;
@@ -38,7 +37,7 @@ public class Path {
 
     @Override
     public String toString(){
-    	DecimalFormat    df   = new DecimalFormat("######0.00");
-        return this.path.toString() + " " + df.format(cost * Math.pow(10, 7)/1000) + " " + capacity;
+  
+        return this.path.toString() + " " + cost + " " + capacity;
     }
 }

@@ -3,16 +3,22 @@ public class Edge{
     private int tail;
     private int head;
 
-    public Edge(int tail, int head) {
-        if (tail<=head) {
+    public Edge(int tail, int head, int sort) {
+    	if (sort == 1) {
+        	if (tail<=head) {
+            	this.tail = tail;
+            	this.head = head;
+        	} else {
+            	this.tail = head;
+            	this.head = tail;
+        	}
+    	} else {
             this.tail = tail;
             this.head = head;
-        } else {
-            this.tail = head;
-            this.head = tail;
-        }
+    	}
     }
-
+    
+    
     public int getTail(){
         return this.tail;
     }

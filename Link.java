@@ -1,4 +1,3 @@
-import java.text.DecimalFormat;
 
 public class Link{
 
@@ -55,7 +54,7 @@ public class Link{
         return false;
     }
 
-    @Override
+    /*@Override
     public int hashCode(){
         int hash = 7;
         hash = 31 * hash + edge.getHead();
@@ -65,12 +64,12 @@ public class Link{
         hash = 31 * hash + (int)capacity;
         return hash;
 
-    }
+    }*/
     @Override
     public String toString(){
-    	DecimalFormat    df   = new DecimalFormat("######0.00");
+
         return "edge: " + edge.toString() +
-                ", distance: " + Math.round(distance * 1000)/1000+
-                ", cost: " + df.format(cost * Math.pow(10,7)/1000) + ", capacity: " + capacity;
+                ", distance: " + Math.round(distance * 1000.0)/1000.0 +
+                ", cost: " + Math.round(cost * Math.pow(10,7))/Math.pow(10,7) + ", capacity: " + capacity;
     }
 }

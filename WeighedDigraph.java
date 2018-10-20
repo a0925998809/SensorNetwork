@@ -115,7 +115,9 @@ public class WeighedDigraph {
 
         /* Check if edge already exists,
          * if it is, replace it with new one assuming it needs to be updated */
-        boolean edgeExists = false;
+        
+     //boolean edgeExists = false;
+ /*
         for (int i = 0; i < currentEdges.size(); i++) {
             if (currentEdges.get(i).to() == newEdge.to()) {
                 currentEdges.set(i, newEdge);
@@ -123,8 +125,8 @@ public class WeighedDigraph {
                 break;
             }
         }
-
-        if (!edgeExists)
+ */
+      //if (!edgeExists)
             currentEdges.add(newEdge);
 
         adj.put(newEdge.from(), currentEdges);

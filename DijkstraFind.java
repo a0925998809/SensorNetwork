@@ -19,6 +19,7 @@ public class DijkstraFind {
     public DijkstraFind(WeighedDigraph graph) {
         this.graph = graph;
         size = graph.size();
+        //System.out.print(graph.vertices());
     }
 
     /**
@@ -27,7 +28,7 @@ public class DijkstraFind {
      * @param vertexB destination vertex
      * @return list of vertices composing shortest path between A and B
      */
-    public ArrayList<Integer> shortestPath(int vertexA, int vertexB) {
+    public ArrayList<Integer> shortestPath(int vertexA, int vertexB, int numberOfDG) {
         previousNode = new HashMap<Integer, Integer>();
         weight = new HashMap<Integer, Double>();
         pq = new PriorityQueue<Integer>(size, PQComparator);
@@ -40,15 +41,20 @@ public class DijkstraFind {
         weight.put(vertexA, 0.0); // weight to has to be 0
         pq.add(vertexA); // enqueue first vertex
 
+        //System.out.print(pq);
+        
         while (pq.size() > 0) {
-            int currentNode = pq.poll();
-            ArrayList<WeighedDigraphEdge> neighbors = graph.edgesOf(currentNode);
+            int currentNode = pq.poll(); //get the head
+            ArrayList<WeighedDigraphEdge> neighbors = graph.edgesOf(currentNode); //get the adjacent list of the head
 
-            if (neighbors == null) continue;
-
+            if (neighbors == null) {
+            	continue;
+            }
+            
+            //
             for (WeighedDigraphEdge neighbor : neighbors) {
                 int nextVertex = neighbor.to();
-
+                if (nextVertex > numberOfDG) {
                 double newDistance = weight.get(currentNode) + neighbor.weight();
                 if (weight.get(nextVertex) == Double.POSITIVE_INFINITY) {
                     previousNode.put(nextVertex, currentNode);
@@ -60,9 +66,11 @@ public class DijkstraFind {
                         weight.put(nextVertex, newDistance);
                     }
                 }
+                
+                }
             }
         }
-
+        //System.out.print(previousNode);
         /* Path from A to B will be stored here */
         ArrayList<Integer> nodePath = new ArrayList<Integer>();
 
@@ -74,7 +82,7 @@ public class DijkstraFind {
         nodePathTemp.push(vertexB);
 
         int v = vertexB;
-        while (previousNode.containsKey(v) && previousNode.get(v) >= 0 && v > 0) {
+        while ((previousNode.containsKey(v)) && (previousNode.get(v) >= 0) && (v > 0)) {
             v = previousNode.get(v);
             nodePathTemp.push(v);
         }

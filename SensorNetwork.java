@@ -16,33 +16,41 @@ public class SensorNetwork {
 	Map<Integer, Integer> connectedNodes = new HashMap<Integer, Integer>();
 	Stack<Integer> s = new Stack<Integer>();
 	static Map<String, Link> links = new HashMap<String, Link>();
+	static Map<String, Link> links2 = new HashMap<String, Link>();
+	static Map<String, Link> linkstest = new HashMap<String, Link>();
 	static ArrayList<Path> paths = new ArrayList<>();
+	static ArrayList<Path> paths2 = new ArrayList<>();
+	static ArrayList<Path> paths3 = new ArrayList<>();
     static int minCapacity;
     static int capacityRandomRange;
+    static int biconnectcounter = 1;
     static int[] dataGens;
     static int[] storageNodes;
+    static int[] dataGens2;
+    static int[] storageNodes2;
 
 	public static void main(String[] args) throws IOException {
+
 		Scanner scan = new Scanner(System.in);
-		System.out.println("Enter the width: (15)");
-//		double width = scan.nextDouble();
-        double width = 15;
+		System.out.println("Enter the width: (e.g.100)");
+		double width = scan.nextDouble();
+        //double width = 150;
 
-		System.out.println("Enter the height: (15)");
-//		double height = scan.nextDouble();
-        double height = 15;
+		System.out.println("Enter the height: (e.g.100)");
+		double height = scan.nextDouble();
+        //double height = 150;
 
-		System.out.println("Enter the number of nodes: (6)");
-//		int numberOfNodes = scan.nextInt();
-        int numberOfNodes = 6;
+		System.out.println("Enter the number of nodes: (e.g.50)");
+		int numberOfNodes = scan.nextInt();
+        //int numberOfNodes = 50;
 
-		System.out.println("Enter the Transmission range in meters: (30)");
-//		int transmissionRange = scan.nextInt();
-        int transmissionRange = 15;
+		System.out.println("Enter the Transmission range in meters: (e.g.30)");
+		int transmissionRange = scan.nextInt();
+        //int transmissionRange = 10;
 
-		System.out.println("How many DGs(Data Generators)? (2)");
-//		int numberOfDG = scan.nextInt();
-        int numberOfDG = 2;
+		System.out.println("How many DGs(Data Generators)? (e.g.10)");
+		int numberOfDG = scan.nextInt();
+        //int numberOfDG = 10;
 
 		dataGens = new int[numberOfDG];
 		System.out.println("Assuming the first " + numberOfDG + " nodes are DGs\n");
@@ -54,16 +62,44 @@ public class SensorNetwork {
         for (int i=0; i<storageNodes.length; i++){
             storageNodes[i] = i + 1 + numberOfDG;
         }
+        /*
+		dataGens2 = new int[numberOfDG];
+		System.out.println("Assuming the first " + numberOfDG + " nodes are DGs\n");
+			
+		for (int i = 1; i<=dataGens2.length; i++) {
+            	dataGens2[i-1] = i;
+        }
+        */
+        
+        /*
+        storageNodes2 = new int[numberOfNodes-numberOfDG-1]; 
+        //value q is the value match with the nodes2 (after delete node)
+        int q = 0; 
+        for (int i=0; i<storageNodes2.length; i++){
+            if(q != 0) {
+            	storageNodes2[i] = q + 1 + numberOfDG;
+            	q++;
+            } else {
+            	q++;
+            	i = i - 1;
+            }
+        }*/
 
-		System.out.println("How many data items per DG? (30)");
+		System.out.println("How many data items per DG? (e.g.30)");
 //		int numberOfDataItemsPerDG = scan.nextInt();
         int numberOfDataItemsPerDG = 30;
 
-        System.out.println("Capacity Random Range per node up from the min capacity:(5)");
+        System.out.println("Capacity Random Range per node up from the min capacity:(e.g.0)");
 //		capacityRandomRange= scan.nextInt();
-        capacityRandomRange= 5;
+        capacityRandomRange= 0;
 
-
+        double totalcost = 0;
+        double withcost = 0;
+        double Ci = 0;
+        double fuCi = 0;
+        double pi = 0;
+        
+        
 		int numberOfSupDem = numberOfDataItemsPerDG * numberOfDG;
         System.out.println("The total number of data items in supply/demand: " + numberOfSupDem);
         scan.close();
@@ -105,66 +141,119 @@ public class SensorNetwork {
 			}
 			System.out.println("}");
 			}
-
+		System.out.println("\nOriginal Graph:");
 		sensor.executeDepthFirstSearchAlg(width, height, adjacencyList1);
         System.out.println();
+		
+		//test if the graphic is bi-connect
+		//System.out.println("\nExecuting DFS Algorithm");
+		for (int i = 1; i <= numberOfNodes; i++) {
+			for (Map.Entry<Integer, Axis> entry : nodes.entrySet()) {
+            	int k = entry.getKey();
+            	Axis v = entry.getValue();
+            	nodes2.put(k, v);
+        	}
+			nodes2.remove(i);
+			Map<Integer, Set<Integer>> adjacencyList2 = new LinkedHashMap<Integer, Set<Integer>> ();
+			System.out.println("\nremoving node:"+ i);
+			sensor.checkbiconnect(i ,numberOfNodes, transmissionRange, adjacencyList2);
+			System.out.println("Executing DFS Algorithm");
+			sensor.executeDepthFirstSearchAlgbi(width, height, adjacencyList2);
+		}
+		
+		if(biconnectcounter == 1) {
+			System.out.println("\nAll of the Graph is fully connected!");
+		} else {
+			System.out.println("\nSome Graph is not fully connected!!");
+			return;
+		}
 
-        System.out.println("Sensor Network Edges with Distance, Cost and Capacity");
-		for (Link link : links.values()){
+		//sort
+		Map<String, Link> treeMap = new TreeMap<String, Link>(linkstest);
+		Map<String, Link> treeMap2 = new TreeMap<String, Link>(links);
+
+        System.out.println("\nSensor Network Edges with Distance, Cost and Capacity");
+		for (Link link : treeMap.values()){
 		    link.setCapacity(rand.nextInt(capacityRandomRange+1) + minCapacity);
-		    System.out.println(link.toString());
-        }
+		    for (Link innerlink : treeMap2.values()) {
+		    	if ((innerlink.getEdge().getHead() == link.getEdge().getHead()) &&(innerlink.getEdge().getTail() == link.getEdge().getTail())) {
+		    		innerlink.setCapacity(link.getCapacity());
+		    		System.out.println(innerlink.toString());
+		    	}
+		    }
+		}
         System.out.println();
-
+        
+ 
         StringBuilder dijkastra_input = new StringBuilder();
-		for (Link link: links.values()){
+		for (Link link: treeMap.values()){
 		    Edge edge = link.getEdge();
 		    dijkastra_input.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
-        }
-
-
+		    /*
+		    if (edge.getTail() == 3 && edge.getHead() == 6) {
+			 Ci = link.getCost();
+		    }*/
+		}
+		
+		//System.out.print(dijkastra_input);
         String fileName = "dijkastra_input.txt";
         BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
         writer.write(dijkastra_input.toString());
-
         writer.close();
-
+        
         // Calling Dijkastra Algorithm
         WeighedDigraph graph;
         graph = new WeighedDigraph(fileName);
-        // Print graph
-        // System.out.print("Representation of WeighedDigraph\n");
         //System.out.print(graph);
-        // System.out.print("\n");
 
         DijkstraFind finder = new DijkstraFind(graph);
-
-        System.out.print("Min Cost Flow Graph: Edge, Cost, Capacity\n");
+        //Dijkstras finder2 = new Dijkstras();
+     
+        System.out.print("Min Cost Flow Graph: Edge, Cost, Capacity\n"); //min capa 
         for(int dg: dataGens){
             for(int sn: storageNodes) {
-                ArrayList<Integer> path = finder.shortestPath(dg, sn);
+                ArrayList<Integer> path = finder.shortestPath(dg, sn, numberOfDG);
+
                 double cost = 0;
                 ArrayList<Double> capacities = new ArrayList<>();
                 for (int i = 1; i <path.size(); i++) {
                     int tail, head;
                     tail = path.get(i-1);
                     head = path.get(i);
-                    if (tail>head){
+                    if (tail > head){
                         int temp = tail;
                         tail = head;
                         head = temp;
                     }
-                    Link link = links.get("(" + tail + ", " + head + ")");
+                   
+                    Link link = linkstest.get("(" + tail + ", " + head + ")");
+
                     cost += link.getCost();
                     capacities.add(link.getCapacity());
+                
                 }
-                double capacity = Collections.min(capacities);
+                //System.out.println(path);
+
+                
+                double capacity = 0;
+                if (capacities != null) {
+                	//capacity = Collections.min(capacities);
+                }
+                
+               /*
+                if (path.size() == 3) {
+                	withcost = cost;
+                }*/
+
+                
                 Path newPath = new Path(path, cost, capacity);
                 paths.add(newPath);
                 System.out.println(newPath);
+   
             }
-        }
 
+        }
+        
         for (int i = 0; i < dataGens.length; i++) {
             ArrayList<Integer> dummyArrList = new ArrayList<>();
             dummyArrList.add(0);
@@ -182,10 +271,119 @@ public class SensorNetwork {
             paths.add(newPath);
             System.out.println(newPath);
         }
-
+        
+        
+        
+ /*       
+        System.out.print("total cost Cv: ");
+        System.out.println(withcost);
+        System.out.print("cost Ci: ");
+        System.out.println(Ci);
         System.out.println();
+*/
+ /*       
+        System.out.println("this time node 3 reports fake cost:");
+        System.out.println("Sensor Network Edges with Distance, Cost and Capacity");
+		for (Link link : links.values()){
+		    link.setCapacity(rand.nextInt(capacityRandomRange+1) + minCapacity);
+		    Edge edge = link.getEdge();
+		    if (edge.getTail() == 3 && edge.getHead() == 6) {
+		    	System.out.println("node 3 reports fake cost as 3");
+		    	links.put(new String("(" + edge.getTail() + ", " + edge.getHead() + ")"), new Link(new Edge(edge.getTail(), edge.getHead()), link.getDistance() , link.getCost() + 1.09E-4, link.getCapacity()));
+		    	//System.out.println(links);
+		    	System.out.println(links.get("(3, 6)"));
+		    }
+		    System.out.println(link.toString());
+		}
+        System.out.println();
+        
+        
+        StringBuilder dijkastra_input3 = new StringBuilder();
+		for (Link link: links.values()){
+		    Edge edge = link.getEdge();
+		    dijkastra_input3.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
+		    
+		    if (edge.getTail() == 3 && edge.getHead() == 6) {
+			 Ci = link.getCost();
+		    }
+		}
+		
+		
+        String fileName3 = "dijkastra_input3.txt";
+        BufferedWriter writer3 = new BufferedWriter(new FileWriter(fileName3));
+        writer3.write(dijkastra_input3.toString());
 
-        /*StringBuilder output = new StringBuilder();
+        writer3.close();
+
+        // Calling Dijkastra Algorithm
+        WeighedDigraph graph3;
+        graph3 = new WeighedDigraph(fileName3);
+
+
+        DijkstraFind finder3 = new DijkstraFind(graph3);
+        
+        System.out.print("Min Cost Flow Graph: Edge, Cost, Capacity\n"); //min capa 
+        for(int dg: dataGens){
+            for(int sn: storageNodes) {
+                ArrayList<Integer> path = finder3.shortestPath(dg, sn);
+                double cost = 0;
+                ArrayList<Double> capacities = new ArrayList<>();
+                for (int i = 1; i <path.size(); i++) {
+                    int tail, head;
+                    tail = path.get(i-1);
+                    head = path.get(i);
+                    if (tail>head){
+                        int temp = tail;
+                        tail = head;
+                        head = temp;
+                    }
+                    Link link = links.get("(" + tail + ", " + head + ")");
+
+                    cost += link.getCost();
+                    capacities.add(link.getCapacity());
+                }
+                
+                
+                double capacity = 0;
+                if (capacities != null) {
+                	capacity = Collections.min(capacities);
+                } 
+                
+                if (path.size() == 3) {
+                	withcost = cost;
+                }
+                
+                Path newPath = new Path(path, cost, capacity);
+                paths3.add(newPath);
+                System.out.println(newPath);
+            }
+        }
+
+        for (int i = 0; i < dataGens.length; i++) {
+            ArrayList<Integer> dummyArrList = new ArrayList<>();
+            dummyArrList.add(0);
+            dummyArrList.add(dataGens[i]);
+            Path newPath = new Path(dummyArrList, 0, numberOfDataItemsPerDG);
+            paths3.add(newPath);
+            System.out.println(newPath);
+        }
+
+        for (int i = 0; i < storageNodes.length; i++) {
+            ArrayList<Integer> dummyArrList = new ArrayList<>();
+            dummyArrList.add(storageNodes[i]);
+            dummyArrList.add(numberOfNodes+1);
+            Path newPath = new Path(dummyArrList, 0, minCapacity);
+            paths3.add(newPath);
+            System.out.println(newPath);
+        }
+        
+        System.out.print("total cost Cv: ");
+        System.out.println(withcost);
+        System.out.print("cost Ci: ");
+        System.out.println(Ci);
+        System.out.println();
+*/
+        StringBuilder output = new StringBuilder();
 
         output.append("p min ").append(numberOfNodes + 2).append(" ").append(paths.size()).append("\n");
         output.append("c min-cost flow problem with ").append(numberOfNodes+2).append(" nodes and ").
@@ -202,6 +400,7 @@ public class SensorNetwork {
                     append(path.getPath().get(path.getPath().size()-1)).append(" ").append("0 ").
                     append((int) path.getCapacity()).append(" ").append(path.getCost()).append("\n");
         }
+        System.out.println();
         System.out.println("Generated Input file for cs2-4.6 program:(pls refer to ourinput.inp in the folder");
         System.out.println(output);
 
@@ -209,7 +408,9 @@ public class SensorNetwork {
         writer = new BufferedWriter(new FileWriter(fileName));
         writer.write(output.toString());
 
-        writer.close();*/
+        writer.close();
+        
+/*        
         
         //start testing if the net work is bi-conneceted
         System.out.println("to test the network is bi-connected, delete one of the nodes");
@@ -219,13 +420,15 @@ public class SensorNetwork {
             nodes2.put(entry.getKey(), entry.getValue());
         }
         //remove node 6
-        nodes2.remove(6);
+        nodes2.remove(3);
         
         //print the node list
 		for(int key :sensor.nodes2.keySet()) {
 			Axis ax = sensor.nodes2.get(key);
 			System.out.println("Node:" + key + ", xAxis:" + ax.getxAxis() + ", yAxis:" + ax.getyAxis());
 		}
+		
+		minCapacity = totalNumberOfData / numberOfStorageNodes;
 		
 		//create a new adjacent List base on the new nodes
 		Map<Integer, Set<Integer>> adjacencyList2 = new LinkedHashMap<Integer, Set<Integer>> ();
@@ -252,8 +455,95 @@ public class SensorNetwork {
 			System.out.println("}");
 			}
         //execute algorithm to draw the graphic
-        sensor.executeDepthFirstSearchAlgbi(width, height, adjacencyList2);   
+        sensor.executeDepthFirstSearchAlgbi(width, height, adjacencyList2);  
         
+        
+        System.out.println("Sensor Network Edges with Distance, Cost and Capacity");
+		for (Link link : links2.values()){
+		    link.setCapacity(rand.nextInt(capacityRandomRange+1) + minCapacity);
+		    System.out.println(link.toString());
+        }
+        System.out.println();
+        
+        StringBuilder dijkastra_input2 = new StringBuilder();
+		for (Link link: links2.values()){
+		    Edge edge = link.getEdge();
+		    dijkastra_input2.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
+        }
+
+
+        String fileName2 = "dijkastra_input2.txt";
+        BufferedWriter writer2 = new BufferedWriter(new FileWriter(fileName2));
+        writer2.write(dijkastra_input2.toString());
+
+        writer2.close();
+
+        // Calling Dijkastra Algorithm
+        WeighedDigraph graph2;
+        graph2 = new WeighedDigraph(fileName2);
+
+
+        DijkstraFind finder2 = new DijkstraFind(graph2);
+        
+        System.out.print("Min Cost Flow Graph: Edge, Cost, Capacity\n"); //min capa 
+        for(int dg: dataGens2){
+            for(int sn: storageNodes2) {
+            	
+            	ArrayList<Integer> path = finder2.shortestPath(dg, sn);
+                double cost = 0;
+                ArrayList<Double> capacities = new ArrayList<>();
+                for (int i = 1; i <path.size(); i++) {
+                    int tail, head;
+                    tail = path.get(i-1);
+                    head = path.get(i);
+                    if (tail>head){
+                        int temp = tail;
+                        tail = head;
+                        head = temp;
+                    }
+                    Link link = links2.get("(" + tail + ", " + head + ")");
+                    cost += link.getCost();
+                    capacities.add(link.getCapacity());
+                }
+                double capacity = Collections.min(capacities);
+                
+                if (path.size() == 3) {
+                	totalcost = cost;
+                }
+                
+                Path newPath = new Path(path, cost, capacity);
+                paths2.add(newPath);
+                System.out.println(newPath);
+            }
+        }
+        System.out.print("total cost Cv-i:");
+        System.out.println(totalcost);
+        System.out.print("node 6 report its Ci as:");
+        fuCi = 2;
+        System.out.println(fuCi);
+        System.out.print("pay:");
+        System.out.println(totalcost - withcost + Ci - Ci);
+ */   
+        /*for (int i = 0; i < dataGens2.length; i++) {
+            ArrayList<Integer> dummyArrList = new ArrayList<>();
+            dummyArrList.add(0);
+            dummyArrList.add(dataGens2[i]);
+            Path newPath = new Path(dummyArrList, 0, numberOfDataItemsPerDG);
+            paths2.add(newPath);
+            System.out.println(newPath);
+        }
+
+        for (int i = 0; i < storageNodes2.length; i++) {
+            ArrayList<Integer> dummyArrList = new ArrayList<>();
+            dummyArrList.add(storageNodes2[i]);
+            dummyArrList.add(numberOfNodes+1);
+            Path newPath = new Path(dummyArrList, 0, minCapacity);
+            paths2.add(newPath);
+            System.out.println(newPath);
+        }*/
+
+       // System.out.println();
+
 	}
 
     double getCost(double l){
@@ -304,14 +594,15 @@ public class SensorNetwork {
 		graphThread.start(); 
 	}
 	
-	//for the new graphic (delete node 6)
+	//for the new graphic (delete nodes to test)
 	void executeDepthFirstSearchAlgbi(double width, double height, Map<Integer, Set<Integer>> adjList) {
-		System.out.println("\nExecuting DFS Algorithm");
+		//System.out.println("\nExecuting DFS Algorithm");
 		//these have to be clear since they already have elements and values after running the algorithm
 		s.clear();
 		explored.clear();
 		discovered.clear();
 		parent.clear();
+
 		//
 		List<Set<Integer>> connectedNodes = new ArrayList<Set<Integer>>();
 		for(int node: adjList.keySet()) {
@@ -322,10 +613,11 @@ public class SensorNetwork {
 				connectedNodes.add(connectedNode);
 			}
 		}
-		
+
 		if(connectedNodes.size() == 1) {
 			System.out.println("Graph is fully connected with one connected component.");
 		} else {
+			biconnectcounter = biconnectcounter + 1;
 			System.out.println("Graph is not fully connected");
 		}
 		
@@ -334,8 +626,9 @@ public class SensorNetwork {
 			System.out.println(list);
 		}
 		
+		/*
 		//Draw second sensor network graph
-		SensorNetworkGraph graph = new SensorNetworkGraph(dataGens);
+		SensorNetworkGraph2 graph = new SensorNetworkGraph2(dataGens2);
 		graph.setGraphWidth(width);
 		graph.setGraphHeight(height);
 		//different graphic have to set different nodes
@@ -344,6 +637,7 @@ public class SensorNetwork {
 		graph.setPreferredSize(new Dimension(960, 800));
 		Thread graphThread = new Thread(graph);
 		graphThread.start(); 
+		*/
 	}
 
 	void recursiveDFS(int u, Set<Integer> connectedNode, Map<Integer, Set<Integer>> adjList) {
@@ -386,7 +680,7 @@ public class SensorNetwork {
 	}
 	
 	void populateNodes(int nodeCount, double width, double height) {
-		Random random = new Random();
+		Random random = new Random(570);
 		
 		for(int i = 1; i <= nodeCount; i++) {
 			Axis axis = new Axis();
@@ -426,6 +720,7 @@ public class SensorNetwork {
 				double distance =  Math.sqrt(((xAxis1-xAxis2)*(xAxis1-xAxis2)) + ((yAxis1-yAxis2)*(yAxis1-yAxis2)));
 				
 				if(distance <= tr) {
+					linkstest.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost(distance), 0));
 					Set<Integer> tempList = adjList.get(node1);
 					tempList.add(node2);
 					adjList.put(node1, tempList);
@@ -433,25 +728,36 @@ public class SensorNetwork {
 					tempList = adjList.get(node2);
 					tempList.add(node1);
 					adjList.put(node2, tempList);
-					if (node1>node2){
-                        links.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1), distance, getCost(distance), 0));
-                    } else {
-                        links.put(new String("(" + node1 + ", " + node2 + ")"), new Link(new Edge(node1, node2), distance, getCost(distance), 0));
-                    }
+					if (node1 > node2){
+                        links.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 1), distance, getCost(distance), 0));
+					} else {
+                    	links.put(new String("(" + node1 + ", " + node2 + ")"), new Link(new Edge(node1, node2, 1), distance, getCost(distance), 0));
+					}
+					
+		
 				}
 			}
 		}
 	}
 	
 	//similar as populateAdjacencyList but the source nodes are different, only 5
-	void checkbiconnect(int nodeCount, int tr, Map<Integer, Set<Integer>> adjList) {
-		for(int i=1; i<= nodeCount; i++) {
-			adjList.put(i, new HashSet<Integer>());
+	void checkbiconnect(int removeconter,int nodeCount, int tr, Map<Integer, Set<Integer>> adjList) {
+		int j = 1;
+		for(int i=1; i < nodeCount; i++) {
+			if (j != removeconter) {
+				adjList.put(j, new HashSet<Integer>());
+				j++;
+			} else {
+				j++;
+				i=i-1;
+			}
 		}
+		//System.out.println(adjList.toString());
 		
 		for(int node1: nodes2.keySet()) {
 			Axis axis1 = nodes2.get(node1);
 			for(int node2: nodes2.keySet()) {
+				
 				Axis axis2 = nodes2.get(node2);
 				
 				if(node1 == node2) {
@@ -473,10 +779,12 @@ public class SensorNetwork {
 					tempList = adjList.get(node2);
 					tempList.add(node1);
 					adjList.put(node2, tempList);
-					if (node1>node2){
-                        links.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1), distance, getCost(distance), 0));
+					
+					
+					if (node1 > node2){
+						links2.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 1), distance, getCost(distance), 0));
                     } else {
-                        links.put(new String("(" + node1 + ", " + node2 + ")"), new Link(new Edge(node1, node2), distance, getCost(distance), 0));
+                    	links2.put(new String("(" + node1 + ", " + node2 + ")"), new Link(new Edge(node1, node2, 1), distance, getCost(distance), 0));
                     }
 				}
 			}

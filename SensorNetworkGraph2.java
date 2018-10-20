@@ -15,7 +15,7 @@ import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class SensorNetworkGraph extends JPanel implements Runnable {
+public class SensorNetworkGraph2 extends JPanel implements Runnable {
 	private static final long serialVersionUID = 1L;
 	
 	private Map<Integer, Axis> nodes;
@@ -28,7 +28,7 @@ public class SensorNetworkGraph extends JPanel implements Runnable {
     private Map<Integer, Set<Integer>> adjList;
     private int[] dataGens;
 
-    public SensorNetworkGraph(int[] dataGens){
+    public SensorNetworkGraph2(int[] dataGens){
         this.dataGens = dataGens;
     }
 
@@ -82,6 +82,7 @@ public class SensorNetworkGraph extends JPanel implements Runnable {
 
        double xScale =  ( (getWidth() - 3 * scaling) / (graphWidth));
        double yScale =   (( getHeight() - 3 * scaling) / (graphHeight));
+       int q =0;
        
        List<Point> graphPoints = new ArrayList<Point>();
        for (Integer key: nodes.keySet()) {
@@ -135,10 +136,11 @@ public class SensorNetworkGraph extends JPanel implements Runnable {
        Stroke stroke = g2.getStroke();
        g2.setColor(Color.gray);
        g2.setStroke(new BasicStroke(2f));
-       for (int node: adjList.keySet()) {
+       /*for (int node: adjList.keySet()) {
     	   if((adjList.get(node) != null) && (!adjList.get(node).isEmpty())) {
     	   for (int adj: adjList.get(node)) {
 	    	   if(adjList.get(node).contains(adj)) {
+
 	    			   int x1 = graphPoints.get(node-1).x;
 	    			   int y1 = graphPoints.get(node-1).y;
 	    			   int x2 = graphPoints.get(adj-1).x;
@@ -148,7 +150,7 @@ public class SensorNetworkGraph extends JPanel implements Runnable {
 	    	   }
     	   }
     	   }
-       }
+       }*/
 
        //Draw the oval
        g2.setStroke(stroke);
@@ -172,11 +174,18 @@ public class SensorNetworkGraph extends JPanel implements Runnable {
        }
        
        //Label the nodes
+       q = 0;
        g2.setColor(Color.blue);
        for (int i = 0; i < graphPoints.size(); i++) {
            int x = graphPoints.get(i).x - ovalSize / 2;
            int y = graphPoints.get(i).y - ovalSize / 2;
-           g2.drawString(""+(i+1), x, y);
+           if (q != 2) {
+        	   g2.drawString(""+(q+1), x, y);
+        	   q++;
+           } else {
+        	   q++;
+        	   i = i-1;
+           }
        }
    }
 
