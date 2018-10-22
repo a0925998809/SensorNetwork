@@ -237,7 +237,7 @@ public class SensorNetwork {
                 
                 double capacity = 0;
                 if (capacities != null) {
-                	//capacity = Collections.min(capacities);
+                	capacity = Collections.min(capacities);
                 }
                 
                /*
