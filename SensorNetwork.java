@@ -10,6 +10,7 @@ public class SensorNetwork {
     static Random rand = new Random(995);
     static Map<Integer, Axis> nodes = new LinkedHashMap<Integer, Axis>();
     static Map<Integer, Axis> nodes2 = new LinkedHashMap<Integer, Axis>();
+    static Map<Integer, Axis> nodes5 = new LinkedHashMap<Integer, Axis>();
 	Map<Integer, Boolean> discovered = new HashMap<Integer, Boolean>();
 	Map<Integer, Boolean> explored = new HashMap<Integer, Boolean>();
 	Map<Integer, Integer> parent = new HashMap<Integer, Integer>();
@@ -17,10 +18,12 @@ public class SensorNetwork {
 	Stack<Integer> s = new Stack<Integer>();
 	static Map<String, Link> links = new HashMap<String, Link>();
 	static Map<String, Link> links2 = new HashMap<String, Link>();
+	static Map<String, Link> links3 = new HashMap<String, Link>();
 	static Map<String, Link> linkstest = new HashMap<String, Link>();
 	static ArrayList<Path> paths = new ArrayList<>();
 	static ArrayList<Path> paths2 = new ArrayList<>();
 	static ArrayList<Path> paths3 = new ArrayList<>();
+	static ArrayList<Path> paths4 = new ArrayList<>();
     static int minCapacity;
     static int capacityRandomRange;
     static int biconnectcounter = 1;
@@ -92,17 +95,21 @@ public class SensorNetwork {
         System.out.println("Capacity Random Range per node up from the min capacity:(e.g.0)");
 //		capacityRandomRange= scan.nextInt();
         capacityRandomRange= 0;
-
-        double totalcost = 0;
-        double withcost = 0;
+        
+        int changenode = 0;
+        int dirhead = 0;
+        int dirtail = 0;
+        double Cvi = 0;
+        double Cv = 0;
         double Ci = 0;
-        double fuCi = 0;
-        double pi = 0;
+        double fakeCi = 0;
+        double pay = 0;
+        double ut =0;
         
         
 		int numberOfSupDem = numberOfDataItemsPerDG * numberOfDG;
         System.out.println("The total number of data items in supply/demand: " + numberOfSupDem);
-        scan.close();
+        
 
 		int numberOfStorageNodes = numberOfNodes - numberOfDG;
 		int totalNumberOfData = numberOfDG * numberOfDataItemsPerDG;
@@ -183,16 +190,13 @@ public class SensorNetwork {
 		    }
 		}
         System.out.println();
+
         
  
         StringBuilder dijkastra_input = new StringBuilder();
 		for (Link link: treeMap.values()){
 		    Edge edge = link.getEdge();
 		    dijkastra_input.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
-		    /*
-		    if (edge.getTail() == 3 && edge.getHead() == 6) {
-			 Ci = link.getCost();
-		    }*/
 		}
 		
 		//System.out.print(dijkastra_input);
@@ -213,7 +217,7 @@ public class SensorNetwork {
         for(int dg: dataGens){
             for(int sn: storageNodes) {
                 ArrayList<Integer> path = finder.shortestPath(dg, sn, numberOfDG);
-
+                ArrayList<Integer> path2 = null;
                 double cost = 0;
                 ArrayList<Double> capacities = new ArrayList<>();
                 for (int i = 1; i <path.size(); i++) {
@@ -229,30 +233,26 @@ public class SensorNetwork {
                     Link link = linkstest.get("(" + tail + ", " + head + ")");
 
                     cost += link.getCost();
-                    capacities.add(link.getCapacity());
-                
+                    capacities.add(link.getCapacity());          
                 }
                 //System.out.println(path);
-
-                
+            
                 double capacity = 0;
                 if (capacities != null) {
                 	capacity = Collections.min(capacities);
                 }
-                
+                              
                /*
                 if (path.size() == 3) {
                 	withcost = cost;
-                }*/
-
+                }*/    
                 
                 Path newPath = new Path(path, cost, capacity);
                 paths.add(newPath);
                 System.out.println(newPath);
-   
             }
-
         }
+
         
         for (int i = 0; i < dataGens.length; i++) {
             ArrayList<Integer> dummyArrList = new ArrayList<>();
@@ -271,7 +271,308 @@ public class SensorNetwork {
             paths.add(newPath);
             System.out.println(newPath);
         }
+        System.out.println(); 
         
+        System.out.println("Input the node which you want to change its cost:");
+        changenode = scan.nextInt();
+        for(int dg: dataGens){
+            for(int sn: storageNodes) {
+                ArrayList<Integer> path = finder.shortestPath(dg, sn, numberOfDG);
+                ArrayList<Integer> path2 = null;
+                double cost = 0;
+                ArrayList<Double> capacities = new ArrayList<>();
+                for (int i = 1; i <path.size(); i++) {
+                    int tail, head;
+                    tail = path.get(i-1);
+                    head = path.get(i);
+                    if (tail > head){
+                        int temp = tail;
+                        tail = head;
+                        head = temp;
+                    }
+                   
+                    Link link = linkstest.get("(" + tail + ", " + head + ")");
+
+                    cost += link.getCost();
+                    capacities.add(link.getCapacity());          
+                }
+                //System.out.println(path);
+            
+                double capacity = 0;
+                if (capacities != null) {
+                	capacity = Collections.min(capacities);
+                }
+                
+                for (int i = 1; i <path.size(); i++) {
+                    int ele;
+                    ele = path.get(i);
+                    if (ele == changenode){
+                    	path2 = path;
+                    	Path newPath2 = new Path(path2, cost, capacity);
+                    	paths2.add(newPath2);
+                    }
+                 }              
+               /*
+                if (path.size() == 3) {
+                	withcost = cost;
+                }*/           
+            }
+        }
+        
+        System.out.println("the path is:");
+        //print selected path
+        for (int i = 1; i <paths2.size(); i++) {
+        	Path path = paths2.get(i);
+
+        	System.out.print(i + ". ");
+        	System.out.println(path);
+        }
+        System.out.println("input the path which you want to change");
+        
+        int change = scan.nextInt();
+        ArrayList<Integer> changepath = paths2.get(change).getPath();
+        System.out.println(changepath);
+        
+        Map<String, Link> treeMap4 = new TreeMap<String, Link>(linkstest);;
+        
+        for (Map.Entry<String, Link> entry : treeMap.entrySet()) {
+        	String k = entry.getKey();
+        	Link v = entry.getValue();
+        	treeMap4.put(k, v);
+    	}
+        //Cv = paths2.get(change).getCost();
+        //System.out.println("the total cost pass node " + changenode + " (Cv) is: " + Cv);
+        ArrayList<Integer> findpath = paths2.get(change).getPath();
+        for (int i=1;i < findpath.size();i++) {
+        	int tail = 0, head = 0;
+        	head = findpath.get(i);
+        	tail = findpath.get(i-1);
+        	if (head == changenode) {
+        		for (Link link : treeMap.values()){
+        		    	if (((link.getEdge().getHead() == head) && (link.getEdge().getTail() == tail))) {
+        		    		System.out.println("Original cost (Ci) is: "+link.getCost());
+        		    		Ci = link.getCost();
+        		    		System.out.println("adding the cost:");
+        		    		fakeCi = scan.nextDouble();
+        		    		System.out.println("the cost is set to (fake cost Ci): "+ (link.getCost() + fakeCi));
+        		    		treeMap4.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
+        		    		treeMap4.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
+        		    		/*for (Link innerlink : treeMap4.values()){
+        		    			int innertail = innerlink.getEdge().getTail();
+        		    			int innerhead = innerlink.getEdge().getHead();
+        		    			if ((innerlink.getEdge().getHead() == head)) {
+        		    				treeMap4.put(new String("(" + innertail + ", " + innerhead + ")"), new Link(innerlink.edge, innerlink.distance, (innerlink.cost + fakeCi), innerlink.capacity));
+        		    			}
+        		    		}*/
+        		    	}
+        		}	
+        	}
+        	if (i == 1) {
+        		dirtail = tail;
+        	}
+        	if (i == (findpath.size()-1)) {
+        		dirhead = head;
+        	}
+        }
+        
+        //check cost change
+       /* for (Link link : treeMap4.values()) {
+        	System.out.println(link.toString());
+		}*/
+        //building new min cost path
+        StringBuilder dijkastra_input3 = new StringBuilder();
+		for (Link link: treeMap4.values()){
+		    Edge edge = link.getEdge();
+		    dijkastra_input3.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
+		}
+		
+		//System.out.print(dijkastra_input);
+        String fileName3 = "dijkastra_input3.txt";
+        BufferedWriter writer3 = new BufferedWriter(new FileWriter(fileName3));
+        writer3.write(dijkastra_input3.toString());
+        writer3.close();
+        
+        // Calling Dijkastra Algorithm
+        WeighedDigraph graph3;
+        graph3 = new WeighedDigraph(fileName3);
+        //System.out.print(graph);
+
+        DijkstraFind finder3 = new DijkstraFind(graph3);
+        //Dijkstras finder2 = new Dijkstras();
+     
+
+        for(int dg: dataGens){
+            for(int sn: storageNodes) {
+                ArrayList<Integer> path = finder3.shortestPath(dg, sn, numberOfDG);
+                ArrayList<Integer> path2 = null;
+                double cost = 0;
+                ArrayList<Double> capacities = new ArrayList<>();
+                for (int i = 1; i <path.size(); i++) {
+                    int tail, head;
+                    tail = path.get(i-1);
+                    head = path.get(i);
+                    if (tail > head){
+                        int temp = tail;
+                        tail = head;
+                        head = temp;
+                    }
+                   
+                    Link link = treeMap4.get("(" + tail + ", " + head + ")");
+
+                    cost += link.getCost();
+                    capacities.add(link.getCapacity());          
+                }
+                //System.out.println(path);
+            
+                double capacity = 0;
+                if (capacities != null) {
+                	capacity = Collections.min(capacities);
+                }  
+                Path newPath = new Path(path, cost, capacity);
+                paths4.add(newPath);
+                //System.out.println(newPath);
+                for(int i=1; i < newPath.getPath().size(); i++) {
+                	int tail = 0, head = 0;
+                	head = newPath.getPath().get(i);
+                	tail = newPath.getPath().get(i-1);
+                	
+                	if ((i == 1) && (tail == dirtail)) {
+                		for(int j = 1; j < newPath.getPath().size(); j++) {
+                			head = 0;
+                			head = newPath.getPath().get(j);
+                			if (j == (newPath.getPath().size()-1) && (head == dirhead)) {
+                				System.out.println("the path with node " + changenode + " is:");
+                				System.out.println(newPath);
+                				Cv = newPath.getCost();
+                				System.out.println("its total cost (Cv) is: " + Cv);
+                        	}
+                		}
+                	}
+                }
+            }
+        }
+        
+        for (Map.Entry<Integer, Axis> entry : nodes.entrySet()) {
+        	int k = entry.getKey();
+        	Axis v = entry.getValue();
+        	nodes2.put(k, v);
+    	}
+        nodes2.remove(changenode);
+        Map<Integer, Set<Integer>> adjacencyList3 = new LinkedHashMap<Integer, Set<Integer>> (); 
+        sensor.removenode(changenode, numberOfNodes, transmissionRange, adjacencyList3);
+       
+        Map<String, Link> treeMap3 = new TreeMap<String, Link>(links3);
+        //check path
+		/*for (Link link : treeMap3.values()) {
+			System.out.println(link.toString());
+		}*/
+		
+        //checking new graph with new cost
+        StringBuilder dijkastra_input2 = new StringBuilder();
+		for (Link link: treeMap3.values()){
+		    Edge edge = link.getEdge();
+		    dijkastra_input2.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
+		}
+		
+		//System.out.print(dijkastra_input);
+        String fileName2 = "dijkastra_input2.txt";
+        BufferedWriter writer2 = new BufferedWriter(new FileWriter(fileName2));
+        writer2.write(dijkastra_input2.toString());
+        writer2.close();
+        
+        // Calling Dijkastra Algorithm
+        WeighedDigraph graph2;
+        graph2 = new WeighedDigraph(fileName2);
+        //System.out.print(graph);
+
+        DijkstraFind finder2 = new DijkstraFind(graph2);
+        //Dijkstras finder2 = new Dijkstras();
+        
+        //since one storage node is removed, need to create new a storage node set
+        storageNodes2 = new int[numberOfNodes-numberOfDG-1]; 
+        //value q is the value match with the nodes2 (after delete node)
+        int q = 0; 
+        for (int i=0; i<storageNodes2.length; i++){
+            if(q != (changenode-numberOfDG-1)) {
+            	storageNodes2[i] = q + 1 + numberOfDG;
+            	q++;
+            } else {
+            	q++;
+            	i = i - 1;
+            }
+        }
+        
+        
+        for(int dg: dataGens){
+            for(int sn: storageNodes2) {
+                ArrayList<Integer> path = finder2.shortestPath(dg, sn, numberOfDG);
+                ArrayList<Integer> path2 = null;
+                double cost = 0;
+                ArrayList<Double> capacities = new ArrayList<>();
+                for (int i = 1; i <path.size(); i++) {
+                    int tail, head;
+                    tail = path.get(i-1);
+                    head = path.get(i);
+                    if (tail > head){
+                        int temp = tail;
+                        tail = head;
+                        head = temp;
+                    }
+                   
+                    Link link = linkstest.get("(" + tail + ", " + head + ")");
+
+                    cost += link.getCost();
+                    capacities.add(link.getCapacity());          
+                }
+                //System.out.println(path);
+            
+                double capacity = 0;
+                if (capacities != null) {
+                	capacity = Collections.min(capacities);
+                }
+                Path newPath = new Path(path, cost, capacity);
+                paths3.add(newPath);
+                for(int i=1; i < newPath.getPath().size(); i++) {
+                	int tail = 0, head = 0;
+                	head = newPath.getPath().get(i);
+                	tail = newPath.getPath().get(i-1);
+                	
+                	if ((i == 1) && (tail == dirtail)) {
+                		for(int j = 1; j < newPath.getPath().size(); j++) {
+                			head = 0;
+                			head = newPath.getPath().get(j);
+                			if (j == (newPath.getPath().size()-1) && (head == dirhead)) {
+                				System.out.println("the path without node " + changenode + " is:");
+                				System.out.println(newPath);
+                				Cvi = newPath.getCost();
+                				System.out.println("its total cost (Cvi) is: " + Cvi);
+                        	}
+                		}
+                	}
+                }
+                //System.out.println(newPath);
+                /*for (int i = 1; i <path.size(); i++) {
+                    int ele;
+                    ele = path.get(i);
+                    if (ele == changenode){
+                    	path2 = path;
+                    	Path newPath2 = new Path(path2, cost, capacity);
+                    	paths3.add(newPath2);
+                    }
+                 }  */              
+            }
+        }
+        pay = Cvi - (Cv - fakeCi);
+        ut = pay- Ci;
+        System.out.println("the payment (Cvi-(Cv-fakeCi)) is:" + pay);
+        System.out.println("the utility (payment - its true cost) is:" + ut);
+        /*//print selected path
+        for (int i = 1; i <paths3.size(); i++) {
+        	Path path = paths3.get(i);
+
+        	System.out.print(i + ". ");
+        	System.out.println(path);
+        }*/
         
         
  /*       
@@ -382,7 +683,7 @@ public class SensorNetwork {
         System.out.print("cost Ci: ");
         System.out.println(Ci);
         System.out.println();
-*/
+
         StringBuilder output = new StringBuilder();
 
         output.append("p min ").append(numberOfNodes + 2).append(" ").append(paths.size()).append("\n");
@@ -740,7 +1041,7 @@ public class SensorNetwork {
 		}
 	}
 	
-	//similar as populateAdjacencyList but the source nodes are different, only 5
+	//similar as populateAdjacencyList but the number of source nodes are different
 	void checkbiconnect(int removeconter,int nodeCount, int tr, Map<Integer, Set<Integer>> adjList) {
 		int j = 1;
 		for(int i=1; i < nodeCount; i++) {
@@ -779,8 +1080,54 @@ public class SensorNetwork {
 					tempList = adjList.get(node2);
 					tempList.add(node1);
 					adjList.put(node2, tempList);
+					if (node1 > node2){
+						links2.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 1), distance, getCost(distance), 0));
+                    } else {
+                    	links2.put(new String("(" + node1 + ", " + node2 + ")"), new Link(new Edge(node1, node2, 1), distance, getCost(distance), 0));
+                    }
+				}
+			}
+		}
+	}
+	void removenode(int removeconter,int nodeCount, int tr, Map<Integer, Set<Integer>> adjList) {
+		int j = 1;
+		for(int i=1; i < nodeCount; i++) {
+			if (j != removeconter) {
+				adjList.put(j, new HashSet<Integer>());
+				j++;
+			} else {
+				j++;
+				i=i-1;
+			}
+		}
+		//System.out.println(adjList.toString());
+		
+		for(int node1: nodes2.keySet()) {
+			Axis axis1 = nodes2.get(node1);
+			for(int node2: nodes2.keySet()) {
+				Axis axis2 = nodes2.get(node2);
+				
+				if(node1 == node2) {
+					continue;
+				}
+				
+				double xAxis1 = axis1.getxAxis();
+				double yAxis1 = axis1.getyAxis();
 					
-					
+				double xAxis2 = axis2.getxAxis();
+				double yAxis2 = axis2.getyAxis();
+				
+				double distance =  Math.sqrt(((xAxis1-xAxis2)*(xAxis1-xAxis2)) + ((yAxis1-yAxis2)*(yAxis1-yAxis2)));
+				
+				if(distance <= tr) {
+					links3.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost(distance), 0));
+					Set<Integer> tempList = adjList.get(node1);
+					tempList.add(node2);
+					adjList.put(node1, tempList);
+						
+					tempList = adjList.get(node2);
+					tempList.add(node1);
+					adjList.put(node2, tempList);
 					if (node1 > node2){
 						links2.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 1), distance, getCost(distance), 0));
                     } else {
