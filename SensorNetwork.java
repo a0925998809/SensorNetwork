@@ -48,29 +48,32 @@ public class SensorNetwork {
     static int[] storageNodes;
     static int[] dataGens2;
     static int[] storageNodes2;
-
+    static int numberOfDG;
+    static int numberOfDataItemsPerDG;
+    static int numberOfNodes;
+    
 	public static void main(String[] args) throws IOException {
 
 		Scanner scan = new Scanner(System.in);
 		System.out.println("Enter the width: (e.g.100)");
-		double width = scan.nextDouble();
-        //double width = 150;
+		//double width = scan.nextDouble();
+        double width = 1000.0;
 
 		System.out.println("Enter the height: (e.g.100)");
-		double height = scan.nextDouble();
-        //double height = 150;
+		//double height = scan.nextDouble();
+        double height = 1000.0;
 
 		System.out.println("Enter the number of nodes: (e.g.50)");
-		int numberOfNodes = scan.nextInt();
-        //int numberOfNodes = 50;
+		//numberOfNodes = scan.nextInt();
+        numberOfNodes = 50;
 
 		System.out.println("Enter the Transmission range in meters: (e.g.30)");
-		int transmissionRange = scan.nextInt();
-        //int transmissionRange = 10;
+		//int transmissionRange = scan.nextInt();
+        int transmissionRange = 300;
 
 		System.out.println("How many DGs(Data Generators)? (e.g.10)");
-		int numberOfDG = scan.nextInt();
-        //int numberOfDG = 10;
+		//numberOfDG = scan.nextInt();
+        numberOfDG = 10;
 
 		dataGens = new int[numberOfDG];
 		System.out.println("Assuming the first " + numberOfDG + " nodes are DGs\n");
@@ -82,34 +85,13 @@ public class SensorNetwork {
         for (int i=0; i<storageNodes.length; i++){
             storageNodes[i] = i + 1 + numberOfDG;
         }
-        /*
-		dataGens2 = new int[numberOfDG];
-		System.out.println("Assuming the first " + numberOfDG + " nodes are DGs\n");
-			
-		for (int i = 1; i<=dataGens2.length; i++) {
-            	dataGens2[i-1] = i;
-        }
-        */
-        
-        /*
-        storageNodes2 = new int[numberOfNodes-numberOfDG-1]; 
-        //value q is the value match with the nodes2 (after delete node)
-        int q = 0; 
-        for (int i=0; i<storageNodes2.length; i++){
-            if(q != 0) {
-            	storageNodes2[i] = q + 1 + numberOfDG;
-            	q++;
-            } else {
-            	q++;
-            	i = i - 1;
-            }
-        }*/
+
 
 		System.out.println("How many data items per DG? (e.g.30)");
 //		int numberOfDataItemsPerDG = scan.nextInt();
-        int numberOfDataItemsPerDG = 30;
+        numberOfDataItemsPerDG = 30;
 
-        System.out.println("Capacity Random Range per node up from the min capacity:(e.g.0)");
+        //System.out.println("Capacity Random Range per node up from the min capacity:(e.g.0)");
 //		capacityRandomRange= scan.nextInt();
         capacityRandomRange= 0;
 
@@ -119,9 +101,6 @@ public class SensorNetwork {
         int dirhead = 0;
         int dirtail = 0;
         ArrayList<Integer> dirpath;
-        
-
-        double ut =0;
         
         
 		int numberOfSupDem = numberOfDataItemsPerDG * numberOfDG;
@@ -139,7 +118,7 @@ public class SensorNetwork {
 		System.out.println("\nNode List:");
 		for(int key :sensor.nodes.keySet()) {
 			Axis ax = sensor.nodes.get(key);
-			System.out.println("Node:" + key + ", xAxis:" + ax.getxAxis() + ", yAxis:" + ax.getyAxis());
+			System.out.println("Node:" + key + ", xAxis:" + ax.getxAxis() + ", yAxis:" + ax.getyAxis() + ", maxcapa:" + ax.getcapa());
 		}
 
 		Map<Integer, Set<Integer>> adjacencyList1 = new LinkedHashMap<Integer, Set<Integer>> ();
@@ -170,7 +149,6 @@ public class SensorNetwork {
         System.out.println();
 		
 		//test if the graphic is bi-connect
-		//System.out.println("\nExecuting DFS Algorithm");
 		for (int i = 1; i <= numberOfNodes; i++) {
 			for (Map.Entry<Integer, Axis> entry : nodes.entrySet()) {
             	int k = entry.getKey();
@@ -194,13 +172,17 @@ public class SensorNetwork {
 
 		//sorting
 		Map<String, Link> treeMap = new TreeMap<String, Link>(linkstest);
-		//this link is to check duplicate nodes (only for printing)
+		
+		//this link is to check duplicate nodes (only for printing information)
+		//when using Dijkastra we need all link lists include duplicate links
 		Map<String, Link> treeMap2 = new TreeMap<String, Link>(links);
 		
+		//create different link with different amp
 		Map<String, Link> treeMapamp1capa = new TreeMap<String, Link>(linksamp1);
 		Map<String, Link> treeMapamp10capa = new TreeMap<String, Link>(linksamp10);
 		Map<String, Link> treeMapamp1000capa = new TreeMap<String, Link>(linksamp1000);
 		Map<String, Link> treeMapamp10000capa = new TreeMap<String, Link>(linksamp10000);
+		
 		//setting capacity for the nodes (amp100)
         System.out.println("\nSensor Network Edges with Distance, Cost and Capacity");
 		for (Link link : treeMap.values()){
@@ -253,7 +235,7 @@ public class SensorNetwork {
         DijkstraFind finder = new DijkstraFind(graph);
         
         
-//first loop to generate the overall min cost flow   
+//first loop to generate the overall min cost flow
         
         System.out.print("Min Cost Flow Graph (original amp): Edge, Cost, Capacity\n"); //min capa 
         for(int dg: dataGens){
@@ -271,6 +253,7 @@ public class SensorNetwork {
                         tail = head;
                         head = temp;
                     }
+                    
                     // can use treeMap (sorted)
                     Link link = linkstest.get("(" + tail + ", " + head + ")");
 
@@ -308,7 +291,7 @@ public class SensorNetwork {
             System.out.println(newPath);
         }
 /*      
-//test the min cost in different amp
+//test the min cost in different amp (use for testing)
         //example for amp10000
         //building input files for dijkastra
         StringBuilder dijkastra_input_ampex = new StringBuilder();
@@ -385,10 +368,10 @@ public class SensorNetwork {
 */     
 
         System.out.println(); 
-        System.out.println("Input the node which you want to change its cost:");
+        System.out.println("Input the node which you want to change its cost: (must not be the data generaters (1 to 10 in this case))");
         changenode = scan.nextInt();
         
-//this loop is to generate the path information about the target node
+//this loop is to generate the path information from the target node
         
         for(int dg: dataGens){
             for(int sn: storageNodes) {
@@ -397,7 +380,7 @@ public class SensorNetwork {
                 double cost = 0;
                 ArrayList<Double> capacities = new ArrayList<>();
                 
-                //get cost&capa
+                //get cost & capa
                 for (int i = 1; i < path.size(); i++) {
                     int tail, head;
                     tail = path.get(i-1);
@@ -414,7 +397,6 @@ public class SensorNetwork {
                     capacities.add(link.getCapacity());          
                 }
                 
-            
                 double capacity = 0;
                 if (capacities != null) {
                 	capacity = Collections.min(capacities);
@@ -430,8 +412,8 @@ public class SensorNetwork {
             }
         }
         
-        int checkstorage = 0; //check if the node is storage node for all path
-        ArrayList<Integer> checkpath = new ArrayList<>(); //the path which is not storage node
+        int checkstorage = 0; //a token which check if the node is storage node (can't remove)
+        ArrayList<Integer> checkpath = new ArrayList<>(); //the path which is not storage node will be in this list
         System.out.println("the path is:");
         //print selected path
         
@@ -452,12 +434,13 @@ public class SensorNetwork {
         	if (countpath == 0) {
         		checkpath.add(i);
         	}
+
         }
         
         //check if the node is storage node for all path
     	if(checkstorage == paths2.size()) {
     		System.out.println(changenode + " is storagenode!");
-    		//return;
+    		
     	}
     	
 //if the node is not storage node use loop to run all usable path
@@ -465,11 +448,12 @@ public class SensorNetwork {
     	else {
     	
     	System.out.println();
-    	System.out.println(checkpath+"can be used to calculate the payment");
-    	
-    	for(int a = 0; a < checkpath.size(); a++ ) {
-        //check if the path change after reporting fake cost
-        int checkin = 0;
+    	System.out.println(checkpath + "can be used to calculate the payment");
+
+        //run checkpath.size() to see all path
+    	for(int a = 0; a < 1; a++ ) {
+        
+        int checkin = 0; //check if the path change after reporting fake cost 
         int checkinamp1 = 0;
         int checkinamp10 = 0;
         int checkinamp1000 = 0;
@@ -492,31 +476,56 @@ public class SensorNetwork {
         double Ciamp1000 = 0;
         double Ciamp10000 = 0;
         double fakeCi = 0;
+        double fakeCiamp1 = 0;
+        double fakeCiamp10 = 0;
+        double fakeCiamp1000 = 0;
+        double fakeCiamp10000 = 0;
         double pay = 0;
         double payamp1 = 0;
         double payamp10 = 0;
         double payamp1000 = 0;
         double payamp10000 = 0;
+        double ut =0;
+        double utamp1 =0;
+        double utamp10 =0;
+        double utamp1000 =0;
+        double utamp10000 =0;
         
+         
     	System.out.println();
         System.out.println("calaulating path: " + checkpath.get(a));
         
         int change = checkpath.get(a);
         ArrayList<Integer> changepath = paths2.get(change).getPath();
         System.out.println(changepath);
-        dirpath = changepath;
-
+        
+        dirpath = changepath; //to record target path
+        
+        //use to calculate electricity cost
+        double linkelec = 0;
+        
+        //need 5 since we need 5 link lists (amp 1, 10, 100, 1000, 10000)
         Map<String, Link> treeMap4 = new TreeMap<String, Link>(linkstest);
+        Map<String, Link> treeMapamp1r = new TreeMap<String, Link>(linkstest);
+        Map<String, Link> treeMapamp10r = new TreeMap<String, Link>(linkstest);
+        Map<String, Link> treeMapamp1000r = new TreeMap<String, Link>(linkstest);
+        Map<String, Link> treeMapamp10000r = new TreeMap<String, Link>(linkstest);
+        
+        //lists for the different amps (different fake cost)
         Map<String, Link> treeMapamp1 = new TreeMap<String, Link>(linksamp1);
         Map<String, Link> treeMapamp10 = new TreeMap<String, Link>(linksamp10);
         Map<String, Link> treeMapamp1000 = new TreeMap<String, Link>(linksamp1000);
         Map<String, Link> treeMapamp10000 = new TreeMap<String, Link>(linksamp10000);
         
-        //coping maps (don't want to change the original value since need to reset the cost)
+        //coping the lists (don't want to change the original value)
         for (Map.Entry<String, Link> entry : treeMap.entrySet()) {
         	String k = entry.getKey();
         	Link v = entry.getValue();
         	treeMap4.put(k, v);
+        	treeMapamp1r.put(k, v);
+        	treeMapamp10r.put(k, v);
+        	treeMapamp1000r.put(k, v);
+        	treeMapamp10000r.put(k, v);
     	}
         for (Map.Entry<String, Link> entry : treeMapamp1capa.entrySet()) {
         	String k = entry.getKey();
@@ -546,81 +555,86 @@ public class SensorNetwork {
         	int tail = 0, head = 0;
         	head = findpath.get(i);
         	tail = findpath.get(i-1);
-        	if (head == changenode) {
+
+        	if (tail == changenode) {
         		//when amp is 100 (original)
         		for (Link link : treeMap.values()){
-        		    if (((link.getEdge().getHead() == head) /*&& (link.getEdge().getHead() > link.getEdge().getTail())*/ && (link.getEdge().getTail() == tail))) {
+        		    if (((link.getEdge().getHead() == head) && (link.getEdge().getTail() == tail))) {
         		    	System.out.println("Original amp(100)");
         		    	System.out.println("Original amp(100) edge:"+link.getEdge().toString());
         		    	System.out.println("Original cost (Ci) is: "+link.getCost());
         		    	Ci = link.getCost();
-        		    	System.out.println("adding the cost:");
-        		    	fakeCi = scan.nextDouble();
-        		   		System.out.println("the cost is set to (fake cost Ci): "+ (link.getCost() + fakeCi));
-        		    	treeMap4.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
-        		    	treeMap4.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
+        		    	System.out.println("adding the cost (if doesn't change, the cost will remain same):");
+        		    	//fakeCi = scan.nextDouble(); //user choose the fake cost
+        		    	fakeCi = 0.0; //don't change (remain same cost)
+        		   		
+        		    	System.out.println("the cost is set to (fake cost Ci): "+ (link.getCost() + fakeCi));
+        		   		treeMap4.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
+        		   		treeMap4.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
+        		   		
+        		   		fakeCi = treeMap4.get("(" + tail + ", " + head +")").getCost();
         		    }
-        		    /*
-        		    if (((link.getEdge().getTail() == head) && (link.getEdge().getHead() > link.getEdge().getTail())&& (link.getEdge().getTail() == tail))) {
-        		    	System.out.println("Original amp(100)");
-        		    	System.out.println("Original amp(100) edge:"+link.getEdge().toString());
-        		    	System.out.println("Original cost (Ci) is: "+link.getCost());
-        		    	Ci = link.getCost();
-        		    	System.out.println("adding the cost:");
-        		    	fakeCi = scan.nextDouble();
-        		   		System.out.println("the cost is set to (fake cost Ci): "+ (link.getCost() + fakeCi));
-        		    	treeMap4.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
-        		    	treeMap4.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
-        		    }
-        		    */
         		}
         		//when amp is 1
-        		for (Link link : treeMapamp1capa.values()){
+        		for (Link link : treeMap.values()){
     		    	if (((link.getEdge().getHead() == head) && (link.getEdge().getTail() == tail))) {
     		    		System.out.println("amp(1)");
     		    		System.out.println("Original cost (Ci amp1) is: " + link.getCost());
     		    		Ciamp1 = link.getCost();
-    		    		System.out.println("adding the cost: " + fakeCi);
-    		    		System.out.println("the cost is set to (fake cost Ci amp): "+ (link.getCost() + fakeCi));
-    		    		treeMapamp1.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
-    		    		treeMapamp1.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
+    		    		fakeCiamp1 = treeMapamp1.get("(" + tail + ", " + head +")").getCost();
+    		    		System.out.println("set the cost to: " + fakeCiamp1);
+    		    		System.out.println("the cost is set to (fake cost Ci amp): "+ fakeCiamp1);
+    		    		treeMapamp1r.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (fakeCiamp1), link.capacity));
+    		    		treeMapamp1r.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (fakeCiamp1), link.capacity));
     		    	}
         		}
         		//when amp is 10
-        		for (Link link : treeMapamp10capa.values()){
+        		for (Link link : treeMap.values()){
     		    	if (((link.getEdge().getHead() == head) && (link.getEdge().getTail() == tail))) {
     		    		System.out.println("amp(10)");
     		    		System.out.println("Original cost (Ci amp10) is: "+link.getCost());
     		    		Ciamp10 = link.getCost();
-    		    		System.out.println("adding the cost: " + fakeCi);
-    		    		System.out.println("the cost is set to (fake cost Ci amp10): "+ (link.getCost() + fakeCi));
-    		    		treeMapamp10.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
-    		    		treeMapamp10.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
+    		    		fakeCiamp10 = treeMapamp10.get("(" + tail + ", " + head +")").getCost();
+    		    		System.out.println("set the cost to: " + fakeCi);
+    		    		System.out.println("the cost is set to (fake cost Ci amp10): "+ (fakeCiamp10));
+    		    		treeMapamp10r.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (fakeCiamp10), link.capacity));
+    		    		treeMapamp10r.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (fakeCiamp10), link.capacity));
     		    	}
         		}
         		//when amp is 1000
-        		for (Link link : treeMapamp1000capa.values()){
+        		for (Link link : treeMap.values()){
     		    	if (((link.getEdge().getHead() == head) && (link.getEdge().getTail() == tail))) {
     		    		System.out.println("amp(1000)");
     		    		System.out.println("Original cost (Ci amp1000) is: "+link.getCost());
     		    		Ciamp1000 = link.getCost();
-    		    		System.out.println("adding the cost: " + fakeCi);
-    		    		System.out.println("the cost is set to (fake cost Ci amp1000): "+ (link.getCost() + fakeCi));
-    		    		treeMapamp1000.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
-    		    		treeMapamp1000.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
+    		    		fakeCiamp1000 = treeMapamp1000.get("(" + tail + ", " + head +")").getCost();
+    		    		System.out.println("set the cost to: " + fakeCiamp1000);
+    		    		System.out.println("the cost is set to (fake cost Ci amp1000): "+ (fakeCiamp1000));
+    		    		treeMapamp1000r.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (fakeCiamp1000), link.capacity));
+    		    		treeMapamp1000r.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (fakeCiamp1000), link.capacity));
     		    	}
         		}
         		//when amp is 10000
-        		for (Link link : treeMapamp10000capa.values()){
+        		for (Link link : treeMap.values()){
     		    	if (((link.getEdge().getHead() == head) && (link.getEdge().getTail() == tail))) {
     		    		System.out.println("amp(10000)");
     		    		System.out.println("Original cost (Ci amp10000) is: "+link.getCost());
     		    		Ciamp10000 = link.getCost();
-    		    		System.out.println("adding the cost: " + fakeCi);
-    		    		System.out.println("the cost is set to (fake cost Ci amp10000): "+ (link.getCost() + fakeCi));
-    		    		treeMapamp10000.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
-    		    		treeMapamp10000.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
+    		    		fakeCiamp10000 = treeMapamp10000.get("(" + tail + ", " + head +")").getCost();
+    		    		System.out.println("set the cost to: " + fakeCiamp10000);
+    		    		System.out.println("the cost is set to (fake cost Ci amp10000): "+ (fakeCiamp10000));
+    		    		treeMapamp10000r.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (fakeCiamp10000), link.capacity));
+    		    		treeMapamp10000r.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (fakeCiamp10000), link.capacity));
     		    	}
+        		}
+        	}
+        	//use to calculate energy cost for the node
+        	if (tail == changenode) {
+        		//when amp is 100 (original)
+        		for (Link link : treeMap.values()) {
+        		    if (((link.getEdge().getHead() == head) && (link.getEdge().getTail() == tail))) {
+        		    	linkelec = link.getCost();
+        		    }
         		}
         	}
         	if (i == 1) {
@@ -631,34 +645,33 @@ public class SensorNetwork {
         	}
         }
         
-        //building new min cost path (after change the cost) for different amp needs different docs
+        //building new min cost path (after change the cost) for different amp needs different doc
         StringBuilder dijkastra_input3 = new StringBuilder();
 		for (Link link: treeMap4.values()){
 		    Edge edge = link.getEdge();
 		    dijkastra_input3.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
 		}
         StringBuilder dijkastra_input_amp1 = new StringBuilder();
-		for (Link link: treeMapamp1.values()){
+		for (Link link: treeMapamp1r.values()){
 		    Edge edge = link.getEdge();
 		    dijkastra_input_amp1.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
 		}
         StringBuilder dijkastra_input_amp10 = new StringBuilder();
-		for (Link link: treeMapamp10.values()){
+		for (Link link: treeMapamp10r.values()){
 		    Edge edge = link.getEdge();
 		    dijkastra_input_amp10.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
 		}
         StringBuilder dijkastra_input_amp1000 = new StringBuilder();
-		for (Link link: treeMapamp1000.values()){
+		for (Link link: treeMapamp1000r.values()){
 		    Edge edge = link.getEdge();
 		    dijkastra_input_amp1000.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
 		}
         StringBuilder dijkastra_input_amp10000 = new StringBuilder();
-		for (Link link: treeMapamp10000.values()){
+		for (Link link: treeMapamp10000r.values()){
 		    Edge edge = link.getEdge();
 		    dijkastra_input_amp10000.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
 		}
 		
-		//System.out.print(dijkastra_input);
         String fileName3 = "dijkastra_input3.txt";
         BufferedWriter writer3 = new BufferedWriter(new FileWriter(fileName3));
         writer3.write(dijkastra_input3.toString());
@@ -719,6 +732,7 @@ public class SensorNetwork {
                 ArrayList<Double> amp10capacities = new ArrayList<>();
                 ArrayList<Double> amp1000capacities = new ArrayList<>();
                 ArrayList<Double> amp10000capacities = new ArrayList<>();
+                
                 //calculating to total cost and the capacity (amp100)
                 for (int i = 1; i <path.size(); i++) {
                     int tail, head;
@@ -746,7 +760,7 @@ public class SensorNetwork {
                         head = temp;
                     }
                    
-                    Link link = treeMapamp1.get("(" + tail + ", " + head + ")");
+                    Link link = treeMapamp1r.get("(" + tail + ", " + head + ")");
 
                     costamp1 += link.getCost();
                     amp1capacities.add(link.getCapacity());          
@@ -762,7 +776,7 @@ public class SensorNetwork {
                         head = temp;
                     }
                    
-                    Link link = treeMapamp10.get("(" + tail + ", " + head + ")");
+                    Link link = treeMapamp10r.get("(" + tail + ", " + head + ")");
 
                     costamp10 += link.getCost();
                     amp10capacities.add(link.getCapacity());          
@@ -778,7 +792,7 @@ public class SensorNetwork {
                         head = temp;
                     }
                    
-                    Link link = treeMapamp1000.get("(" + tail + ", " + head + ")");
+                    Link link = treeMapamp1000r.get("(" + tail + ", " + head + ")");
 
                     costamp1000 += link.getCost();
                     amp1000capacities.add(link.getCapacity());          
@@ -794,7 +808,7 @@ public class SensorNetwork {
                         head = temp;
                     }
                    
-                    Link link = treeMapamp10000.get("(" + tail + ", " + head + ")");
+                    Link link = treeMapamp10000r.get("(" + tail + ", " + head + ")");
 
                     costamp10000 += link.getCost();
                     amp10000capacities.add(link.getCapacity());          
@@ -835,7 +849,7 @@ public class SensorNetwork {
                 pathsamp1000.add(newPathamp1000);
                 pathsamp10000.add(newPathamp10000);
 
-                //adding new costs and paths, also check if the path has changed (the fake cost is too high)
+                //adding new costs and paths, also check if the path has changed (the fake cost is too high, the path will change)
                 for(int i=1; i < newPath.getPath().size(); i++) {
                 	int tail = 0, head = 0;
                 	head = newPath.getPath().get(i);
@@ -983,7 +997,7 @@ public class SensorNetwork {
             }
         }
         
-//this loop is to remove nodes to calculate cost without the target node
+//this loop is to remove nodes to calculate total cost without the target node
         
         //copy since don't want to remove to original nodes
         for (Map.Entry<Integer, Axis> entry : nodes.entrySet()) {
@@ -991,6 +1005,7 @@ public class SensorNetwork {
         	Axis v = entry.getValue();
         	nodes2.put(k, v);
     	}
+        
         //remove 
         nodes2.remove(changenode);
         Map<Integer, Set<Integer>> adjacencyList3 = new LinkedHashMap<Integer, Set<Integer>> (); 
@@ -1000,10 +1015,10 @@ public class SensorNetwork {
        
         //sort
         Map<String, Link> treeMap3 = new TreeMap<String, Link>(links3);
-        Map<String, Link> treeMapamp1re = new TreeMap<String, Link>(linksamp1re);
-        Map<String, Link> treeMapamp10re = new TreeMap<String, Link>(linksamp10re);
-        Map<String, Link> treeMapamp1000re = new TreeMap<String, Link>(linksamp1000re);
-        Map<String, Link> treeMapamp10000re = new TreeMap<String, Link>(linksamp10000re);
+        Map<String, Link> treeMapamp1rr = new TreeMap<String, Link>(links3);
+        Map<String, Link> treeMapamp10rr = new TreeMap<String, Link>(links3);
+        Map<String, Link> treeMapamp1000rr = new TreeMap<String, Link>(links3);
+        Map<String, Link> treeMapamp10000rr = new TreeMap<String, Link>(links3);
 		
         //building new files for dijkastra input
         StringBuilder dijkastra_input2 = new StringBuilder();
@@ -1012,22 +1027,22 @@ public class SensorNetwork {
 		    dijkastra_input2.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
 		}
         StringBuilder dijkastra_input_reamp1 = new StringBuilder();
-		for (Link link: treeMapamp1re.values()){
+		for (Link link: treeMapamp1rr.values()){
 		    Edge edge = link.getEdge();
 		    dijkastra_input_reamp1.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
 		}
         StringBuilder dijkastra_input_reamp10 = new StringBuilder();
-		for (Link link: treeMapamp10re.values()){
+		for (Link link: treeMapamp10rr.values()){
 		    Edge edge = link.getEdge();
 		    dijkastra_input_reamp10.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
 		}
         StringBuilder dijkastra_input_reamp1000 = new StringBuilder();
-		for (Link link: treeMapamp1000re.values()){
+		for (Link link: treeMapamp1000rr.values()){
 		    Edge edge = link.getEdge();
 		    dijkastra_input_reamp1000.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
 		}
         StringBuilder dijkastra_input_reamp10000 = new StringBuilder();
-		for (Link link: treeMapamp10000re.values()){
+		for (Link link: treeMapamp10000rr.values()){
 		    Edge edge = link.getEdge();
 		    dijkastra_input_reamp10000.append(edge.getTail()).append(' ').append(edge.getHead()).append(' ').append(link.getCost()).append("\n");
 		}
@@ -1118,7 +1133,7 @@ public class SensorNetwork {
                         head = temp;
                     }
                    
-                    Link link = linkstest.get("(" + tail + ", " + head + ")");
+                    Link link = treeMap3.get("(" + tail + ", " + head + ")");
                     cost += link.getCost();
                     capacities.add(link.getCapacity());          
                 }
@@ -1133,7 +1148,7 @@ public class SensorNetwork {
                         head = temp;
                     }
                    
-                    Link link = treeMapamp1.get("(" + tail + ", " + head + ")");
+                    Link link = treeMapamp1rr.get("(" + tail + ", " + head + ")");
                     amp1cost += link.getCost();
                     amp1capacities.add(link.getCapacity());          
                 }
@@ -1148,7 +1163,7 @@ public class SensorNetwork {
                         head = temp;
                     }
                    
-                    Link link = treeMapamp10.get("(" + tail + ", " + head + ")");
+                    Link link = treeMapamp10rr.get("(" + tail + ", " + head + ")");
 
                     amp10cost += link.getCost();
                     amp10capacities.add(link.getCapacity());          
@@ -1164,7 +1179,7 @@ public class SensorNetwork {
                         head = temp;
                     }
                    
-                    Link link = treeMapamp1000.get("(" + tail + ", " + head + ")");
+                    Link link = treeMapamp1000rr.get("(" + tail + ", " + head + ")");
 
                     amp1000cost += link.getCost();
                     amp1000capacities.add(link.getCapacity());          
@@ -1180,7 +1195,7 @@ public class SensorNetwork {
                         head = temp;
                     }
                    
-                    Link link = treeMapamp10000.get("(" + tail + ", " + head + ")");
+                    Link link = treeMapamp10000rr.get("(" + tail + ", " + head + ")");
 
                     amp10000cost += link.getCost();
                     amp10000capacities.add(link.getCapacity());          
@@ -1319,13 +1334,14 @@ public class SensorNetwork {
                 
             }
         }
-        
+
         pay = Cvi - (Cv - fakeCi);
-        payamp1 = Cviamp1 - (Cvamp1 - fakeCi);
-        payamp10 = Cviamp10 - (Cvamp10 - fakeCi);
-        payamp1000 = Cviamp1000 - (Cvamp1000 - fakeCi);
-        payamp10000 = Cviamp10000 - (Cvamp10000 - fakeCi);
+        payamp1 = Cviamp1 - (Cvamp1 - fakeCiamp1);
+        payamp10 = Cviamp10 - (Cvamp10 - fakeCiamp10);
+        payamp1000 = Cviamp1000 - (Cvamp1000 - fakeCiamp1000);
+        payamp10000 = Cviamp10000 - (Cvamp10000 - fakeCiamp10000);
         
+        //payment will be 0 if the min cost flow choose different path
         if (checkin == 0) {
         	pay = 0.0;
         }
@@ -1342,26 +1358,33 @@ public class SensorNetwork {
         	payamp10000 = 0.0;
         }
         
-        //ut = pay- Ci;
-        
+        ut = pay - Ci;
+        utamp1 = payamp1- Ciamp1;
+        utamp10 = payamp10 - Ciamp10;
+        utamp1000 = payamp1000 - Ciamp1000;
+        utamp10000 = payamp10000 - Ciamp10000;
+        System.out.println();
+        System.out.println("the following informaiton considers transfering one data item form the generater:");
         System.out.println("the payment for amp100 (Cvi-(Cv-fakeCi)) is:" + pay);
         System.out.println("the payment for amp1 (Cvi-(Cv-fakeCi)) is:" + payamp1);
         System.out.println("the payment for amp10 (Cvi-(Cv-fakeCi)) is:" + payamp10);
         System.out.println("the payment for amp1000 (Cvi-(Cv-fakeCi)) is:" + payamp1000);
         System.out.println("the payment for amp10000 (Cvi-(Cv-fakeCi)) is:" + payamp10000);
-        //System.out.println("the utility (payment - its true cost) is:" + ut);
-    	
+        System.out.println();
+        System.out.println("the utility amp100 (payment - its true cost) is:" + ut);
+        System.out.println("the utility amp1 (payment - its true cost) is:" + utamp1);
+        System.out.println("the utility amp10 (payment - its true cost) is:" + utamp10);
+        System.out.println("the utility amp1000 (payment - its true cost) is:" + utamp1000);
+        System.out.println("the utility amp10000 (payment - its true cost) is:" + utamp10000);
+        System.out.println();
+        System.out.println("the electricity cost (receive + send) of this node is:" + linkelec);
+        System.out.println("the total energy cost of this path is:" + Cv);
     	}//end for
     	}//end else
-/*       
-        System.out.print("total cost Cv: ");
-        System.out.println(withcost);
-        System.out.print("cost Ci: ");
-        System.out.println(Ci);
-        System.out.println();
-*/
     	
-/*
+
+    	
+/*      //for generating input file for min cost program
 
         StringBuilder output = new StringBuilder();
 
@@ -1403,7 +1426,7 @@ public class SensorNetwork {
         final double Epsilon_amp = 100 * Math.pow(10,-12); // Epsilon_amp = 100 pJ/bit/squared(m) (from paper1)
         double Etx = E_elec * K + Epsilon_amp * K * l * l; // Sending energy consumption
         double Erx = E_elec * K; // Receiving energy consumption
-        return Etx + Erx; // return the sum of sending and receiving energy
+        return (Etx + Erx)*10000; // return the sum of sending and receiving energy
     }
     double getCost1(double l){
         final int K = 512; // k = 512B (from paper0)
@@ -1411,7 +1434,7 @@ public class SensorNetwork {
         final double Epsilon_amp = 1 * Math.pow(10,-12); // Epsilon_amp = 1 pJ/bit/squared(m) (from paper1)
         double Etx = E_elec * K + Epsilon_amp * K * l * l; // Sending energy consumption
         double Erx = E_elec * K; // Receiving energy consumption
-        return Etx + Erx; // return the sum of sending and receiving energy
+        return (Etx + Erx)*10000; // return the sum of sending and receiving energy
     }
     double getCost10(double l){
         final int K = 512; // k = 512B (from paper0)
@@ -1419,7 +1442,7 @@ public class SensorNetwork {
         final double Epsilon_amp = 10 * Math.pow(10,-12); // Epsilon_amp = 10 pJ/bit/squared(m) (from paper1)
         double Etx = E_elec * K + Epsilon_amp * K * l * l; // Sending energy consumption
         double Erx = E_elec * K; // Receiving energy consumption
-        return Etx + Erx; // return the sum of sending and receiving energy
+        return (Etx + Erx)*10000; // return the sum of sending and receiving energy
     }
     double getCost1000(double l){
         final int K = 512; // k = 512B (from paper0)
@@ -1427,7 +1450,7 @@ public class SensorNetwork {
         final double Epsilon_amp = 1000 * Math.pow(10,-12); // Epsilon_amp = 1000 pJ/bit/squared(m) (from paper1)
         double Etx = E_elec * K + Epsilon_amp * K * l * l; // Sending energy consumption
         double Erx = E_elec * K; // Receiving energy consumption
-        return Etx + Erx; // return the sum of sending and receiving energy
+        return (Etx + Erx)*10000; // return the sum of sending and receiving energy
     }
     double getCost10000(double l){
         final int K = 512; // k = 512B (from paper0)
@@ -1435,7 +1458,7 @@ public class SensorNetwork {
         final double Epsilon_amp = 10000 * Math.pow(10,-12); // Epsilon_amp = 10000 pJ/bit/squared(m) (from paper1)
         double Etx = E_elec * K + Epsilon_amp * K * l * l; // Sending energy consumption
         double Erx = E_elec * K; // Receiving energy consumption
-        return Etx + Erx; // return the sum of sending and receiving energy
+        return (Etx + Erx)*10000; // return the sum of sending and receiving energy
     }
     
     //for the original graphic
@@ -1508,19 +1531,6 @@ public class SensorNetwork {
 		for(Set<Integer> list: connectedNodes) {
 			System.out.println(list);
 		}
-		
-		/*
-		//Draw second sensor network graph
-		SensorNetworkGraph2 graph = new SensorNetworkGraph2(dataGens2);
-		graph.setGraphWidth(width);
-		graph.setGraphHeight(height);
-		//different graphic have to set different nodes
-		graph.setNodes(nodes2);
-		graph.setAdjList(adjList);
-		graph.setPreferredSize(new Dimension(960, 800));
-		Thread graphThread = new Thread(graph);
-		graphThread.start(); 
-		*/
 	}
 
 	void recursiveDFS(int u, Set<Integer> connectedNode, Map<Integer, Set<Integer>> adjList) {
@@ -1570,12 +1580,15 @@ public class SensorNetwork {
 			int scale = (int) Math.pow(10, 1);
 			double xAxis =(0 + random.nextDouble() * (width - 0));
 			double yAxis = 0 + random.nextDouble() * (height - 0);
+			int capa = ((numberOfDG * numberOfDataItemsPerDG) / (numberOfNodes - numberOfDG)) + 10;
 			
 			xAxis = (double)Math.floor(xAxis * scale) / scale;
 			yAxis = (double)Math.floor(yAxis * scale) / scale;
 			
+			
 			axis.setxAxis(xAxis);
 			axis.setyAxis(yAxis);
+			axis.setcapa(capa);
 			
 			nodes.put(i, axis);	
 		}
@@ -1639,7 +1652,6 @@ public class SensorNetwork {
 				i=i-1;
 			}
 		}
-		//System.out.println(adjList.toString());
 		
 		for(int node1: nodes2.keySet()) {
 			Axis axis1 = nodes2.get(node1);
@@ -1675,6 +1687,7 @@ public class SensorNetwork {
 			}
 		}
 	}
+	
 	//use for removing nodes
 	void removenode(int removeconter,int nodeCount, int tr, Map<Integer, Set<Integer>> adjList) {
 		int j = 1;
@@ -1687,7 +1700,6 @@ public class SensorNetwork {
 				i=i-1;
 			}
 		}
-		//System.out.println(adjList.toString());
 		
 		for(int node1: nodes2.keySet()) {
 			Axis axis1 = nodes2.get(node1);

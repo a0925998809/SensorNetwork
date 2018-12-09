@@ -1,11 +1,12 @@
-
+import java.text.DecimalFormat;
 public class Link{
 
     Edge edge;
     double distance;
     double cost;
     double capacity;
-
+    DecimalFormat fix = new DecimalFormat("##.##");
+    
     public Link(Edge edge, double distance, double cost, double capacity) {
         this.edge = edge;
         this.distance = distance;
