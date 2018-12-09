@@ -1377,8 +1377,12 @@ public class SensorNetwork {
         System.out.println("the utility amp1000 (payment - its true cost) is:" + utamp1000);
         System.out.println("the utility amp10000 (payment - its true cost) is:" + utamp10000);
         System.out.println();
-        System.out.println("the electricity cost (receive + send) of this node is:" + linkelec);
-        System.out.println("the total energy cost of this path is:" + Cv);
+        System.out.println("the true electricity cost (receive + send) of this node is:" + linkelec);
+        System.out.println("the total energy cost of this path is: (amp100)" + Cv);
+        System.out.println("the total energy cost of this path is: (amp1)" + Cvamp1);
+        System.out.println("the total energy cost of this path is: (amp10)" + Cvamp10);
+        System.out.println("the total energy cost of this path is: (amp1000)" + Cvamp1000);
+        System.out.println("the total energy cost of this path is: (amp10000)" + Cvamp10000);
     	}//end for
     	}//end else
     	
