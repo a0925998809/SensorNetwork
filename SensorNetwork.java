@@ -3,6 +3,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.text.DecimalFormat;
 
 public class SensorNetwork {
 
@@ -51,6 +52,7 @@ public class SensorNetwork {
     static int numberOfDG;
     static int numberOfDataItemsPerDG;
     static int numberOfNodes;
+    static DecimalFormat fix = new DecimalFormat("##.########");
     
 	public static void main(String[] args) throws IOException {
 
@@ -370,6 +372,8 @@ public class SensorNetwork {
         System.out.println(); 
         System.out.println("Input the node which you want to change its cost: (must not be the data generaters (1 to 10 in this case))");
         changenode = scan.nextInt();
+        //for(changenode = numberOfNodes-numberOfDG+1; changenode < numberOfNodes; changenode++) {
+        	
         
 //this loop is to generate the path information from the target node
         
@@ -880,7 +884,7 @@ public class SensorNetwork {
                 
                 //amp1
                 for(int i=1; i < newPathamp1.getPath().size(); i++) {
-                	int tail = 0, head = 0;
+                	int tail = 0, head = 0, contsame = 1;
                 	head = newPathamp1.getPath().get(i);
                 	tail = newPathamp1.getPath().get(i-1);
                 	//checking if the path is the target path
@@ -895,11 +899,19 @@ public class SensorNetwork {
                 				System.out.println("the path (amp1) with node " + changenode + " is:");
                 				System.out.println(newPathamp1);
                 				//check weather the new path pass the target node or not
-            					for (int k = 1; k < newPathamp1.getPath().size() ; k++) {
-            						if (newPathamp1.getPath().get(k-1) == changenode) {
-            							checkinamp1 = 1;
-            						}         						
-            					}
+                				for (int k = 1; k < newPathamp1.getPath().size() ; k++) {
+                					if((newPathamp1.getPath().size() == newPath.getPath().size())) {
+                						if ((newPathamp1.getPath().get(k-1) == newPath.getPath().get(k-1))) {
+                							contsame = contsame+1;
+                						} 
+                						/*if ((newPathamp10000.getPath().get(k-1) == changenode)) {
+                							checkinamp10000 = 1;
+                						} */
+                					}
+                				}
+                				if (contsame == newPathamp1.getPath().size()) {
+                					checkinamp1 = 1;
+                				}
                 				Cvamp1 = newPathamp1.getCost();
                 				System.out.println("its total cost (Cv amp1) is: " + Cvamp1);
                         	}
@@ -909,7 +921,7 @@ public class SensorNetwork {
                 
                 //amp10
                 for(int i=1; i < newPathamp10.getPath().size(); i++) {
-                	int tail = 0, head = 0;
+                	int tail = 0, head = 0, contsame = 1;
                 	head = newPathamp10.getPath().get(i);
                 	tail = newPathamp10.getPath().get(i-1);
                 	//checking if the path is the target path
@@ -924,11 +936,19 @@ public class SensorNetwork {
                 				System.out.println("the path (amp10) with node " + changenode + " is:");
                 				System.out.println(newPathamp10);
                 				//check weather the new path pass the target node or not
-            					for (int k = 1; k < newPathamp10.getPath().size() ; k++) {
-            						if (newPathamp10.getPath().get(k-1) == changenode) {
-            							checkinamp10 = 1;
-            						}         						
-            					}
+                				for (int k = 1; k < newPathamp10.getPath().size() ; k++) {
+                					if((newPathamp10.getPath().size() == newPath.getPath().size())) {
+                						if ((newPathamp10.getPath().get(k-1) == newPath.getPath().get(k-1))) {
+                							contsame = contsame+1;
+                						} 
+                						/*if ((newPathamp10000.getPath().get(k-1) == changenode)) {
+                							checkinamp10000 = 1;
+                						} */
+                					}
+                				}
+                				if (contsame == newPathamp10.getPath().size()) {
+                					checkinamp10 = 1;
+                				}
                 				Cvamp10 = newPathamp10.getCost();
                 				System.out.println("its total cost (Cv amp10) is: " + Cvamp10);
                         	}
@@ -938,7 +958,7 @@ public class SensorNetwork {
                 
                 //amp1000
                 for(int i=1; i < newPathamp1000.getPath().size(); i++) {
-                	int tail = 0, head = 0;
+                	int tail = 0, head = 0, contsame = 1;
                 	head = newPathamp1000.getPath().get(i);
                 	tail = newPathamp1000.getPath().get(i-1);
                 	//checking if the path is the target path
@@ -953,12 +973,19 @@ public class SensorNetwork {
                 				System.out.println("the path (amp1000) with node " + changenode + " is:");
                 				System.out.println(newPathamp1000);
                 				//check weather the new path pass the target node or not
-            					for (int k = 1; k < newPathamp1000.getPath().size() ; k++) {
-            						if (newPathamp1000.getPath().get(k-1) == changenode) {
-            							checkinamp1000 = 1;
-            						}         						
-            					}
-            					
+                				for (int k = 1; k < newPathamp1000.getPath().size() ; k++) {
+                					if((newPathamp1000.getPath().size() == newPath.getPath().size())) {
+                						if ((newPathamp1000.getPath().get(k-1) == newPath.getPath().get(k-1))) {
+                							contsame = contsame+1;
+                						} 
+                						/*if ((newPathamp10000.getPath().get(k-1) == changenode)) {
+                							checkinamp10000 = 1;
+                						} */
+                					}
+                				}
+                				if (contsame == newPathamp1000.getPath().size()) {
+                					checkinamp1000 = 1;
+                				}
                 				Cvamp1000 = newPathamp1000.getCost();
                 				System.out.println("its total cost (Cv amp1000) is: " + Cvamp1000);
                         	}
@@ -968,7 +995,7 @@ public class SensorNetwork {
                 
                 //amp10000
                 for(int i=1; i < newPathamp10000.getPath().size(); i++) {
-                	int tail = 0, head = 0;
+                	int tail = 0, head = 0, contsame = 1;
                 	head = newPathamp10000.getPath().get(i);
                 	tail = newPathamp10000.getPath().get(i-1);
                 	//checking if the path is the target path
@@ -984,9 +1011,17 @@ public class SensorNetwork {
                 				System.out.println(newPathamp10000);
                 				//check weather the new path pass the target node or not
                 				for (int k = 1; k < newPathamp10000.getPath().size() ; k++) {
-                					if (newPathamp10000.getPath().get(k-1) == changenode) {
-                						checkinamp10000 = 1;
-                					}         						
+                					if((newPathamp10000.getPath().size() == newPath.getPath().size())) {
+                						if ((newPathamp10000.getPath().get(k-1) == newPath.getPath().get(k-1))) {
+                							contsame = contsame+1;
+                						} 
+                						/*if ((newPathamp10000.getPath().get(k-1) == changenode)) {
+                							checkinamp10000 = 1;
+                						} */
+                					}
+                				}
+                				if (contsame == newPathamp10000.getPath().size()) {
+                					checkinamp10000 = 1;
                 				}
                 				Cvamp10000 = newPathamp10000.getCost();
                 				System.out.println("its total cost (Cv amp10000) is: " + Cvamp10000);
@@ -1115,6 +1150,11 @@ public class SensorNetwork {
                 double amp10cost = 0;
                 double amp1000cost = 0;
                 double amp10000cost = 0;
+                double capacity = 0;
+                double amp1capacity = 0;
+                double amp10capacity = 0;
+                double amp1000capacity = 0;
+                double amp10000capacity = 0;
                 
                 ArrayList<Double> capacities = new ArrayList<>();
                 ArrayList<Double> amp1capacities = new ArrayList<>();
@@ -1200,13 +1240,7 @@ public class SensorNetwork {
                     amp10000cost += link.getCost();
                     amp10000capacities.add(link.getCapacity());          
                 }
-                
             
-                double capacity = 0;
-                double amp1capacity = 0;
-                double amp10capacity = 0;
-                double amp1000capacity = 0;
-                double amp10000capacity = 0;
                 
                 if (capacities != null) {
                 	capacity = Collections.min(capacities);
@@ -1365,23 +1399,23 @@ public class SensorNetwork {
         utamp10000 = payamp10000 - Ciamp10000;
         System.out.println();
         System.out.println("the following informaiton considers transfering one data item form the generater:");
-        System.out.println("the payment for amp100 (Cvi-(Cv-fakeCi)) is:" + pay);
-        System.out.println("the payment for amp1 (Cvi-(Cv-fakeCi)) is:" + payamp1);
-        System.out.println("the payment for amp10 (Cvi-(Cv-fakeCi)) is:" + payamp10);
-        System.out.println("the payment for amp1000 (Cvi-(Cv-fakeCi)) is:" + payamp1000);
-        System.out.println("the payment for amp10000 (Cvi-(Cv-fakeCi)) is:" + payamp10000);
+        System.out.println("the payment for amp100 (Cvi-(Cv-fakeCi)) is:" + fix.format(pay));
+        System.out.println("the payment for amp1 (Cvi-(Cv-fakeCi)) is:" + fix.format(payamp1));
+        System.out.println("the payment for amp10 (Cvi-(Cv-fakeCi)) is:" + fix.format(payamp10));
+        System.out.println("the payment for amp1000 (Cvi-(Cv-fakeCi)) is:" + fix.format(payamp1000));
+        System.out.println("the payment for amp10000 (Cvi-(Cv-fakeCi)) is:" + fix.format(payamp10000));
         System.out.println();
-        System.out.println("the utility amp100 (payment - its true cost) is:" + ut);
-        System.out.println("the utility amp1 (payment - its true cost) is:" + utamp1);
-        System.out.println("the utility amp10 (payment - its true cost) is:" + utamp10);
-        System.out.println("the utility amp1000 (payment - its true cost) is:" + utamp1000);
-        System.out.println("the utility amp10000 (payment - its true cost) is:" + utamp10000);
+        System.out.println("the utility amp100 (payment - its true cost) is:" + fix.format(ut));
+        System.out.println("the utility amp1 (payment - its true cost) is:" + fix.format(utamp1));
+        System.out.println("the utility amp10 (payment - its true cost) is:" + fix.format(utamp10));
+        System.out.println("the utility amp1000 (payment - its true cost) is:" + fix.format(utamp1000));
+        System.out.println("the utility amp10000 (payment - its true cost) is:" + fix.format(utamp10000));
         System.out.println();
-        System.out.println("the electricity cost (receive + send) of this node is:" + linkelec);
-        System.out.println("the total energy cost of this path is:" + Cv);
+        System.out.println("the electricity cost (receive + send) of this node is:" + fix.format(linkelec));
+        System.out.println("the total energy cost of this path is:" + fix.format(Cv));
     	}//end for
     	}//end else
-    	
+        
 
     	
 /*      //for generating input file for min cost program
@@ -1426,7 +1460,7 @@ public class SensorNetwork {
         final double Epsilon_amp = 100 * Math.pow(10,-12); // Epsilon_amp = 100 pJ/bit/squared(m) (from paper1)
         double Etx = E_elec * K + Epsilon_amp * K * l * l; // Sending energy consumption
         double Erx = E_elec * K; // Receiving energy consumption
-        return (Etx + Erx)*10000; // return the sum of sending and receiving energy
+        return Math.round((Etx + Erx)*1000000)/100.0; // return the sum of sending and receiving energy
     }
     double getCost1(double l){
         final int K = 512; // k = 512B (from paper0)
@@ -1434,7 +1468,7 @@ public class SensorNetwork {
         final double Epsilon_amp = 1 * Math.pow(10,-12); // Epsilon_amp = 1 pJ/bit/squared(m) (from paper1)
         double Etx = E_elec * K + Epsilon_amp * K * l * l; // Sending energy consumption
         double Erx = E_elec * K; // Receiving energy consumption
-        return (Etx + Erx)*10000; // return the sum of sending and receiving energy
+        return Math.round((Etx + Erx)*1000000)/100.0; // return the sum of sending and receiving energy
     }
     double getCost10(double l){
         final int K = 512; // k = 512B (from paper0)
@@ -1442,7 +1476,7 @@ public class SensorNetwork {
         final double Epsilon_amp = 10 * Math.pow(10,-12); // Epsilon_amp = 10 pJ/bit/squared(m) (from paper1)
         double Etx = E_elec * K + Epsilon_amp * K * l * l; // Sending energy consumption
         double Erx = E_elec * K; // Receiving energy consumption
-        return (Etx + Erx)*10000; // return the sum of sending and receiving energy
+        return Math.round((Etx + Erx)*1000000)/100.0; // return the sum of sending and receiving energy
     }
     double getCost1000(double l){
         final int K = 512; // k = 512B (from paper0)
@@ -1450,7 +1484,7 @@ public class SensorNetwork {
         final double Epsilon_amp = 1000 * Math.pow(10,-12); // Epsilon_amp = 1000 pJ/bit/squared(m) (from paper1)
         double Etx = E_elec * K + Epsilon_amp * K * l * l; // Sending energy consumption
         double Erx = E_elec * K; // Receiving energy consumption
-        return (Etx + Erx)*10000; // return the sum of sending and receiving energy
+        return Math.round((Etx + Erx)*1000000)/100.0; // return the sum of sending and receiving energy
     }
     double getCost10000(double l){
         final int K = 512; // k = 512B (from paper0)
@@ -1458,7 +1492,7 @@ public class SensorNetwork {
         final double Epsilon_amp = 10000 * Math.pow(10,-12); // Epsilon_amp = 10000 pJ/bit/squared(m) (from paper1)
         double Etx = E_elec * K + Epsilon_amp * K * l * l; // Sending energy consumption
         double Erx = E_elec * K; // Receiving energy consumption
-        return (Etx + Erx)*10000; // return the sum of sending and receiving energy
+        return Math.round((Etx + Erx)*1000000)/100.0; // return the sum of sending and receiving energy
     }
     
     //for the original graphic
@@ -1489,6 +1523,7 @@ public class SensorNetwork {
 			System.out.println(list);
 		}
 		
+		/*
 		//Draw first sensor network graph
 		SensorNetworkGraph graph = new SensorNetworkGraph(dataGens);
 		graph.setGraphWidth(width);
@@ -1497,7 +1532,8 @@ public class SensorNetwork {
 		graph.setAdjList(adjList);
 		graph.setPreferredSize(new Dimension(960, 800));
 		Thread graphThread = new Thread(graph);
-		graphThread.start(); 
+		graphThread.start();
+		*/ 
 	}
 	
 	//for the new graphic (delete nodes to test)
@@ -1573,7 +1609,7 @@ public class SensorNetwork {
 	}
 	
 	void populateNodes(int nodeCount, double width, double height) {
-		Random random = new Random(570);
+		Random random = new Random(555);
 		
 		for(int i = 1; i <= nodeCount; i++) {
 			Axis axis = new Axis();
@@ -1659,7 +1695,7 @@ public class SensorNetwork {
 				
 				Axis axis2 = nodes2.get(node2);
 				
-				if(node1 == node2) {
+				if((node1 == node2) || ((node1 <= numberOfDG) && (node2 <= numberOfDG))) {
 					continue;
 				}
 				double xAxis1 = axis1.getxAxis();

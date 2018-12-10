@@ -5,7 +5,7 @@ public class Link{
     double distance;
     double cost;
     double capacity;
-    DecimalFormat fix = new DecimalFormat("##.##");
+    DecimalFormat fix = new DecimalFormat("##.######");
     
     public Link(Edge edge, double distance, double cost, double capacity) {
         this.edge = edge;
