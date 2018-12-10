@@ -1,0 +1,22 @@
+p min 8 14
+c min-cost flow problem with 8 nodes and 14 arcs
+n 0 60
+c supply of 60 at node 0
+n 7 -60
+c demand of 60 at node 7
+c arc list follows
+c arc has <tail> <head> <capacity l.b.> <capacity u.b> <cost>
+a 1 3 0 15 1.0725888E-4
+a 1 4 0 15 1.1300096000000002E-4
+a 1 5 0 15 1.0753843200000001E-4
+a 1 6 0 15 1.10773248E-4
+a 2 3 0 15 1.11657984E-4
+a 2 4 0 15 1.0445056E-4
+a 2 5 0 15 2.1586944000000002E-4
+a 2 6 0 15 1.0349465600000002E-4
+a 0 1 0 30 0.0
+a 0 2 0 30 0.0
+a 3 7 0 15 0.0
+a 4 7 0 15 0.0
+a 5 7 0 15 0.0
+a 6 7 0 15 0.0
