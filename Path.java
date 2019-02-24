@@ -3,12 +3,10 @@ import java.util.ArrayList;
 public class Path {
     private ArrayList<Integer> path;
     private double cost;
-    private double capacity;
 
-    public Path(ArrayList<Integer> path, double cost, double capacity){
+    public Path(ArrayList<Integer> path, double cost){
         this.path = path;
         this.cost = cost;
-        this.capacity = capacity;
     }
 
     public ArrayList<Integer> getPath() {
@@ -19,10 +17,6 @@ public class Path {
         return cost;
     }
 
-    public double getCapacity() {
-        return capacity;
-    }
-
     public void setPath(ArrayList<Integer> path) {
         this.path = path;
     }
@@ -31,13 +25,10 @@ public class Path {
         this.cost = cost;
     }
 
-    public void setCapacity(double capacity) {
-        this.capacity = capacity;
-    }
 
     @Override
     public String toString(){
   
-        return this.path.toString() + " " + cost + " " + capacity;
+        return this.path.toString() + " " + cost;
     }
 }

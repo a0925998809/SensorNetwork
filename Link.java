@@ -4,14 +4,14 @@ public class Link{
     Edge edge;
     double distance;
     double cost;
-    double capacity;
+    double energy;
     DecimalFormat fix = new DecimalFormat("##.######");
     
-    public Link(Edge edge, double distance, double cost, double capacity) {
+    public Link(Edge edge, double distance, double cost, double energy) {
         this.edge = edge;
         this.distance = distance;
         this.cost = cost;
-        this.capacity = capacity;
+        this.energy = energy;
     }
 
     public void setEdge(Edge edge) {
@@ -25,9 +25,9 @@ public class Link{
     public void setCost(double cost) {
         this.cost = cost;
     }
-
-    public void setCapacity(double capacity) {
-        this.capacity = capacity;
+    
+    public void setEnergy(double energy) {
+        this.energy = energy;
     }
 
     public Edge getEdge() {
@@ -41,9 +41,9 @@ public class Link{
     public double getCost() {
         return cost;
     }
-
-    public double getCapacity() {
-        return capacity;
+    
+    public double getEnergy() {
+        return energy;
     }
 
     @Override
@@ -71,6 +71,7 @@ public class Link{
 
         return "edge: " + edge.toString() +
                 ", distance: " + Math.round(distance * 1000.0)/1000.0 +
-                ", cost: " + Math.round(cost * Math.pow(10,7))/Math.pow(10,7) + ", capacity: " + capacity;
+                ", cost: " + Math.round(cost * Math.pow(10,7))/Math.pow(10,7) +
+                ", energycapacity: " + energy;
     }
 }

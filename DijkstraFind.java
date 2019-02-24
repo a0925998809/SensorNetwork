@@ -54,7 +54,8 @@ public class DijkstraFind {
             //
             for (WeighedDigraphEdge neighbor : neighbors) {
                 int nextVertex = neighbor.to();
-                if (nextVertex > numberOfDG) {
+                //this loop considers DG can not pass data between themselves
+                //if (nextVertex > numberOfDG) {
                 double newDistance = weight.get(currentNode) + neighbor.weight();
                 if (weight.get(nextVertex) == Double.POSITIVE_INFINITY) {
                     previousNode.put(nextVertex, currentNode);
@@ -67,7 +68,7 @@ public class DijkstraFind {
                     }
                 }
                 
-                }
+                //}
             }
         }
         //System.out.print(previousNode);

@@ -5,6 +5,16 @@ import java.io.IOException;
 import java.util.*;
 import java.text.DecimalFormat;
 
+	/**
+	 * This program will generate a sensor network graphic
+	 * and use Dijkstra algorithm to find the shortest data
+	 * preservation path. It will calculate the cost, payment
+	 * utility, and total energy cost for the node.
+	 *
+	 * @author  Shang-Lin Hsu, Zeyi Liu, and Yimin Wang 
+	 * @since   2018-09-09
+	 */
+
 public class SensorNetwork {
 
     private static long seed = 995;
@@ -51,6 +61,7 @@ public class SensorNetwork {
     static int[] storageNodes2;
     static int numberOfDG;
     static int numberOfDataItemsPerDG;
+    static int numberOfStoragePerSN;
     static int numberOfNodes;
     static DecimalFormat fix = new DecimalFormat("##.########");
     
@@ -58,24 +69,24 @@ public class SensorNetwork {
 
 		Scanner scan = new Scanner(System.in);
 		System.out.println("Enter the width: (e.g.100)");
-		//double width = scan.nextDouble();
-        double width = 1000.0;
+		double width = scan.nextDouble();
+        //double width = 1000.0;
 
 		System.out.println("Enter the height: (e.g.100)");
-		//double height = scan.nextDouble();
-        double height = 1000.0;
+		double height = scan.nextDouble();
+        //double height = 1000.0;
 
 		System.out.println("Enter the number of nodes: (e.g.50)");
-		//numberOfNodes = scan.nextInt();
-        numberOfNodes = 50;
+		numberOfNodes = scan.nextInt();
+        //numberOfNodes = 50;
 
 		System.out.println("Enter the Transmission range in meters: (e.g.30)");
-		//int transmissionRange = scan.nextInt();
-        int transmissionRange = 300;
+		int transmissionRange = scan.nextInt();
+        //int transmissionRange = 300;
 
 		System.out.println("How many DGs(Data Generators)? (e.g.10)");
-		//numberOfDG = scan.nextInt();
-        numberOfDG = 10;
+		numberOfDG = scan.nextInt();
+        //numberOfDG = 10;
 
 		dataGens = new int[numberOfDG];
 		System.out.println("Assuming the first " + numberOfDG + " nodes are DGs\n");
@@ -90,11 +101,13 @@ public class SensorNetwork {
 
 
 		System.out.println("How many data items per DG? (e.g.30)");
-//		int numberOfDataItemsPerDG = scan.nextInt();
-        numberOfDataItemsPerDG = 30;
-
-        //System.out.println("Capacity Random Range per node up from the min capacity:(e.g.0)");
-//		capacityRandomRange= scan.nextInt();
+		numberOfDataItemsPerDG = scan.nextInt();
+        //numberOfDataItemsPerDG = 30;
+		
+		System.out.println("How many data could be stored per storagenode? (e.g.30)");
+		numberOfStoragePerSN = scan.nextInt();
+        //numberOfDataItemsPerDG = 30;
+		
         capacityRandomRange= 0;
 
         int changenode = 0;
@@ -102,13 +115,20 @@ public class SensorNetwork {
         //the head and tail of the target's path
         int dirhead = 0;
         int dirtail = 0;
+        
         ArrayList<Integer> dirpath;
         
         
 		int numberOfSupDem = numberOfDataItemsPerDG * numberOfDG;
-        System.out.println("The total number of data items in supply/demand: " + numberOfSupDem);
+		int numberOfstorage = numberOfStoragePerSN * (numberOfNodes-numberOfDG);
+        System.out.println("The total number of data items overloading: " + numberOfSupDem);
+        System.out.println("The total number of data items storage: " + numberOfstorage);
         
-
+        if (numberOfSupDem > numberOfstorage) {
+        	System.out.println("No enough storage");
+        	return;
+        }
+        
 		int numberOfStorageNodes = numberOfNodes - numberOfDG;
 		int totalNumberOfData = numberOfDG * numberOfDataItemsPerDG;
 		minCapacity = totalNumberOfData / numberOfStorageNodes;
@@ -120,7 +140,7 @@ public class SensorNetwork {
 		System.out.println("\nNode List:");
 		for(int key :sensor.nodes.keySet()) {
 			Axis ax = sensor.nodes.get(key);
-			System.out.println("Node:" + key + ", xAxis:" + ax.getxAxis() + ", yAxis:" + ax.getyAxis() + ", maxcapa:" + ax.getcapa());
+			System.out.println("Node:" + key + ", xAxis:" + ax.getxAxis() + ", yAxis:" + ax.getyAxis() + ", energycapacity:" + ax.getcapa());
 		}
 
 		Map<Integer, Set<Integer>> adjacencyList1 = new LinkedHashMap<Integer, Set<Integer>> ();
@@ -146,6 +166,7 @@ public class SensorNetwork {
 			}
 			System.out.println("}");
 			}
+		
 		System.out.println("\nOriginal Graph:");
 		sensor.executeDepthFirstSearchAlg(width, height, adjacencyList1);
         System.out.println();
@@ -185,39 +206,72 @@ public class SensorNetwork {
 		Map<String, Link> treeMapamp1000capa = new TreeMap<String, Link>(linksamp1000);
 		Map<String, Link> treeMapamp10000capa = new TreeMap<String, Link>(linksamp10000);
 		
-		//setting capacity for the nodes (amp100)
+
         System.out.println("\nSensor Network Edges with Distance, Cost and Capacity");
 		for (Link link : treeMap.values()){
 		    link.setCapacity(rand.nextInt(capacityRandomRange+1) + minCapacity);
 		    for (Link innerlink : treeMap2.values()) {
 		    	if ((innerlink.getEdge().getHead() == link.getEdge().getHead()) &&(innerlink.getEdge().getTail() == link.getEdge().getTail())) {
-		    		innerlink.setCapacity(link.getCapacity());
 		    		System.out.println(innerlink.toString());
 		    	}
 		    }
 		}
 		
 		//setting capacity for the nodes (amp1)
-		for (Link link : treeMapamp1capa.values()){
-		    link.setCapacity(rand.nextInt(capacityRandomRange+1) + minCapacity);
-		}
-		//setting capacity for the nodes (amp10)
-		for (Link link : treeMapamp10capa.values()){
-		    link.setCapacity(rand.nextInt(capacityRandomRange+1) + minCapacity);
-		}
-		//setting capacity for the nodes (amp1000)
-		for (Link link : treeMapamp1000capa.values()){
-		    link.setCapacity(rand.nextInt(capacityRandomRange+1) + minCapacity);
-		}
-		//setting capacity for the nodes (amp10000)
-		for (Link link : treeMapamp10000capa.values()){
-		    link.setCapacity(rand.nextInt(capacityRandomRange+1) + minCapacity);
-		}
 		
         System.out.println();
+//creating energy cost graphic
+        System.out.print("S -> {");
+    	for (int i=0; i<dataGens.length; i++) {
+    		if (i == dataGens.length-1) {
+    			System.out.print(dataGens[i] + "'}, ");
+    		}
+    		else {
+    			System.out.print(dataGens[i] + "', ");
+    		}
+        }
+    	System.out.print("Energycapacity for each edge:" + numberOfDataItemsPerDG);
+    	System.out.println();
+    	
+		for(int i: adjacencyList1.keySet()) {
+			double capa = Double.POSITIVE_INFINITY;
+			System.out.print(i);
+			System.out.print("'' -> {");
+			int adjSize = adjacencyList1.get(i).size();
 
+			if(!adjacencyList1.isEmpty()){
+                int adjCount = 0;
+				for(int j: adjacencyList1.get(i)) {
+                    adjCount+=1;
+				    if(adjCount==adjSize){
+                        System.out.print(j + "'");
+                    } else {
+                        System.out.print(j + "', ");
+                    }
+				}
+			}
+			System.out.println("}, Energycapacity: " + capa);
+			
+			System.out.print(i);
+			System.out.println("' -> {" + i + "''}, " + "Energycapacity: " + nodes.get(i).getcapa());
+		}
+		
+        System.out.print("T <- {");
+    	for (int i=0; i<storageNodes.length; i++) {
+    		if (i == storageNodes.length-1) {
+    			System.out.print(storageNodes[i] + "'}, ");
+    		}
+    		else {
+    			System.out.print(storageNodes[i] + "', ");
+    		}
+        }
+    	System.out.print("Energycapacity for each edge:" + numberOfStoragePerSN);
+    	System.out.println();
         
-       //building input files for dijkastra
+        
+        
+        
+       /*//building input files for dijkastra
         StringBuilder dijkastra_input = new StringBuilder();
 		for (Link link: treeMap.values()){
 		    Edge edge = link.getEdge();
@@ -234,10 +288,10 @@ public class SensorNetwork {
         WeighedDigraph graph;
         graph = new WeighedDigraph(fileName);
 
-        DijkstraFind finder = new DijkstraFind(graph);
+        DijkstraFind finder = new DijkstraFind(graph);*/
         
         
-//first loop to generate the overall min cost flow
+/*//first loop to generate the overall min cost flow
         
         System.out.print("Min Cost Flow Graph (original amp): Edge, Cost, Capacity\n"); //min capa 
         for(int dg: dataGens){
@@ -245,7 +299,6 @@ public class SensorNetwork {
                 ArrayList<Integer> path = finder.shortestPath(dg, sn, numberOfDG);
                 
                 double cost = 0;
-                ArrayList<Double> capacities = new ArrayList<>();
                 for (int i = 1; i <path.size(); i++) {
                     int tail, head;
                     tail = path.get(i-1);
@@ -259,16 +312,10 @@ public class SensorNetwork {
                     // can use treeMap (sorted)
                     Link link = linkstest.get("(" + tail + ", " + head + ")");
 
-                    cost += link.getCost();
-                    capacities.add(link.getCapacity());          
-                }
-            
-                double capacity = 0;
-                if (capacities != null) {
-                	capacity = Collections.min(capacities);
+                    cost += link.getCost();      
                 }
                 
-                Path newPath = new Path(path, cost, capacity);
+                Path newPath = new Path(path, cost);
                 paths.add(newPath);
                 System.out.println(newPath);
             }
@@ -279,7 +326,7 @@ public class SensorNetwork {
             ArrayList<Integer> dummyArrList = new ArrayList<>();
             dummyArrList.add(0);
             dummyArrList.add(dataGens[i]);
-            Path newPath = new Path(dummyArrList, 0, numberOfDataItemsPerDG);
+            Path newPath = new Path(dummyArrList, 0);
             paths.add(newPath);
             System.out.println(newPath);
         }
@@ -288,10 +335,10 @@ public class SensorNetwork {
             ArrayList<Integer> dummyArrList = new ArrayList<>();
             dummyArrList.add(storageNodes[i]);
             dummyArrList.add(numberOfNodes+1);
-            Path newPath = new Path(dummyArrList, 0, minCapacity);
+            Path newPath = new Path(dummyArrList, 0);
             paths.add(newPath);
             System.out.println(newPath);
-        }
+        }*/
 /*      
 //test the min cost in different amp (use for testing)
         //example for amp10000
@@ -368,21 +415,21 @@ public class SensorNetwork {
             System.out.println(newPath);
         }
 */     
-
+        /* to select an input to remove
         System.out.println(); 
-        System.out.println("Input the node which you want to change its cost: (must not be the data generaters (1 to 10 in this case))");
+        System.out.println("Input the node which you want to change its cost: (must not be the data generaters! ("+ 1 + " to " + numberOfDG + " in this case))");
         changenode = scan.nextInt();
+        */
         //for(changenode = numberOfNodes-numberOfDG+1; changenode < numberOfNodes; changenode++) {
         	
         
-//this loop is to generate the path information from the target node
+/*//this loop is to generate the path information from the target node
         
         for(int dg: dataGens){
             for(int sn: storageNodes) {
                 ArrayList<Integer> path = finder.shortestPath(dg, sn, numberOfDG);
                 ArrayList<Integer> path2 = null;
                 double cost = 0;
-                ArrayList<Double> capacities = new ArrayList<>();
                 
                 //get cost & capa
                 for (int i = 1; i < path.size(); i++) {
@@ -397,19 +444,15 @@ public class SensorNetwork {
                    
                     Link link = linkstest.get("(" + tail + ", " + head + ")");
 
-                    cost += link.getCost();
-                    capacities.add(link.getCapacity());          
+                    cost += link.getCost();          
                 }
                 
-                double capacity = 0;
-                if (capacities != null) {
-                	capacity = Collections.min(capacities);
-                }
+
                 
                 for (int i = 1; i < path.size(); i++) {
                     if (path.get(i) == changenode){
                     	path2 = path;
-                    	Path newPath2 = new Path(path2, cost, capacity);
+                    	Path newPath2 = new Path(path2, cost);
                     	paths2.add(newPath2);
                     }
                  }                        
@@ -439,23 +482,24 @@ public class SensorNetwork {
         		checkpath.add(i);
         	}
 
-        }
+        }*/
         
-        //check if the node is storage node for all path
-    	if(checkstorage == paths2.size()) {
-    		System.out.println(changenode + " is storagenode!");
+        //check if the node is storage node for all path (need to remove the end else)
+    	/*if(checkstorage == paths2.size()) {
+    		System.out.println(changenode + " is storagenode! please execute this program again!");
     		
     	}
     	
 //if the node is not storage node use loop to run all usable path
     	
-    	else {
-    	
+    	else {*/
+    	/*
     	System.out.println();
-    	System.out.println(checkpath + "can be used to calculate the payment");
+    	System.out.println(checkpath + "\nCan be used to calculate the payment. Please choose one from the list above");
 
         //run checkpath.size() to see all path
-    	for(int a = 0; a < 1; a++ ) {
+    	int a = scan.nextInt();
+    	//for(int a = 0; a < 1; a++ ) {
         
         int checkin = 0; //check if the path change after reporting fake cost 
         int checkinamp1 = 0;
@@ -497,9 +541,9 @@ public class SensorNetwork {
         
          
     	System.out.println();
-        System.out.println("calaulating path: " + checkpath.get(a));
+        System.out.println("calaulating path: " + a);
         
-        int change = checkpath.get(a);
+        int change = a;
         ArrayList<Integer> changepath = paths2.get(change).getPath();
         System.out.println(changepath);
         
@@ -520,8 +564,9 @@ public class SensorNetwork {
         Map<String, Link> treeMapamp10 = new TreeMap<String, Link>(linksamp10);
         Map<String, Link> treeMapamp1000 = new TreeMap<String, Link>(linksamp1000);
         Map<String, Link> treeMapamp10000 = new TreeMap<String, Link>(linksamp10000);
+        */
         
-        //coping the lists (don't want to change the original value)
+        /*//coping the lists (don't want to change the original value)
         for (Map.Entry<String, Link> entry : treeMap.entrySet()) {
         	String k = entry.getKey();
         	Link v = entry.getValue();
@@ -550,9 +595,10 @@ public class SensorNetwork {
         	String k = entry.getKey();
         	Link v = entry.getValue();
         	treeMapamp10000.put(k, v);
-    	}
+    	}*/
         
-//this loop is to generate original total cost and adding the fake cost
+        
+/*//this loop is to generate original total cost and changing the fake cost
         //find the paths which pass the target node
         ArrayList<Integer> findpath = paths2.get(change).getPath();
         for (int i=1;i < findpath.size();i++) {
@@ -573,8 +619,8 @@ public class SensorNetwork {
         		    	fakeCi = 0.0; //don't change (remain same cost)
         		   		
         		    	System.out.println("the cost is set to (fake cost Ci): "+ (link.getCost() + fakeCi));
-        		   		treeMap4.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
-        		   		treeMap4.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi), link.capacity));
+        		   		treeMap4.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi)));
+        		   		treeMap4.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (link.cost + fakeCi)));
         		   		
         		   		fakeCi = treeMap4.get("(" + tail + ", " + head +")").getCost();
         		    }
@@ -588,8 +634,8 @@ public class SensorNetwork {
     		    		fakeCiamp1 = treeMapamp1.get("(" + tail + ", " + head +")").getCost();
     		    		System.out.println("set the cost to: " + fakeCiamp1);
     		    		System.out.println("the cost is set to (fake cost Ci amp): "+ fakeCiamp1);
-    		    		treeMapamp1r.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (fakeCiamp1), link.capacity));
-    		    		treeMapamp1r.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (fakeCiamp1), link.capacity));
+    		    		treeMapamp1r.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (fakeCiamp1)));
+    		    		treeMapamp1r.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (fakeCiamp1)));
     		    	}
         		}
         		//when amp is 10
@@ -601,8 +647,8 @@ public class SensorNetwork {
     		    		fakeCiamp10 = treeMapamp10.get("(" + tail + ", " + head +")").getCost();
     		    		System.out.println("set the cost to: " + fakeCi);
     		    		System.out.println("the cost is set to (fake cost Ci amp10): "+ (fakeCiamp10));
-    		    		treeMapamp10r.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (fakeCiamp10), link.capacity));
-    		    		treeMapamp10r.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (fakeCiamp10), link.capacity));
+    		    		treeMapamp10r.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (fakeCiamp10)));
+    		    		treeMapamp10r.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (fakeCiamp10)));
     		    	}
         		}
         		//when amp is 1000
@@ -614,8 +660,8 @@ public class SensorNetwork {
     		    		fakeCiamp1000 = treeMapamp1000.get("(" + tail + ", " + head +")").getCost();
     		    		System.out.println("set the cost to: " + fakeCiamp1000);
     		    		System.out.println("the cost is set to (fake cost Ci amp1000): "+ (fakeCiamp1000));
-    		    		treeMapamp1000r.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (fakeCiamp1000), link.capacity));
-    		    		treeMapamp1000r.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (fakeCiamp1000), link.capacity));
+    		    		treeMapamp1000r.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (fakeCiamp1000)));
+    		    		treeMapamp1000r.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (fakeCiamp1000)));
     		    	}
         		}
         		//when amp is 10000
@@ -627,8 +673,8 @@ public class SensorNetwork {
     		    		fakeCiamp10000 = treeMapamp10000.get("(" + tail + ", " + head +")").getCost();
     		    		System.out.println("set the cost to: " + fakeCiamp10000);
     		    		System.out.println("the cost is set to (fake cost Ci amp10000): "+ (fakeCiamp10000));
-    		    		treeMapamp10000r.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (fakeCiamp10000), link.capacity));
-    		    		treeMapamp10000r.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (fakeCiamp10000), link.capacity));
+    		    		treeMapamp10000r.put(new String("(" + tail + ", " + head + ")"), new Link(link.edge, link.distance, (fakeCiamp10000)));
+    		    		treeMapamp10000r.put(new String("(" + head + ", " + tail + ")"), new Link(link.edge, link.distance, (fakeCiamp10000)));
     		    	}
         		}
         	}
@@ -714,8 +760,8 @@ public class SensorNetwork {
         DijkstraFind finderamp10 = new DijkstraFind(graphamp10);
         DijkstraFind finderamp1000 = new DijkstraFind(graphamp1000);
         DijkstraFind finderamp10000 = new DijkstraFind(graphamp10000);
-     
-//this loop is to calculate the new total cost (fake)
+     */
+/*//this loop is to calculate the new total cost (fake)
         
         for(int dg: dataGens){
             for(int sn: storageNodes) {
@@ -731,12 +777,6 @@ public class SensorNetwork {
                 double costamp1000 = 0;
                 double costamp10000 = 0;
                 
-                ArrayList<Double> capacities = new ArrayList<>();
-                ArrayList<Double> amp1capacities = new ArrayList<>();
-                ArrayList<Double> amp10capacities = new ArrayList<>();
-                ArrayList<Double> amp1000capacities = new ArrayList<>();
-                ArrayList<Double> amp10000capacities = new ArrayList<>();
-                
                 //calculating to total cost and the capacity (amp100)
                 for (int i = 1; i <path.size(); i++) {
                     int tail, head;
@@ -751,7 +791,7 @@ public class SensorNetwork {
                     Link link = treeMap4.get("(" + tail + ", " + head + ")");
 
                     cost += link.getCost();
-                    capacities.add(link.getCapacity());          
+         
                 }
                 //amp1
                 for (int i = 1; i <pathamp1.size(); i++) {
@@ -767,7 +807,7 @@ public class SensorNetwork {
                     Link link = treeMapamp1r.get("(" + tail + ", " + head + ")");
 
                     costamp1 += link.getCost();
-                    amp1capacities.add(link.getCapacity());          
+        
                 }
                 //amp10
                 for (int i = 1; i <pathamp10.size(); i++) {
@@ -783,7 +823,7 @@ public class SensorNetwork {
                     Link link = treeMapamp10r.get("(" + tail + ", " + head + ")");
 
                     costamp10 += link.getCost();
-                    amp10capacities.add(link.getCapacity());          
+         
                 }
                 //amp1000
                 for (int i = 1; i <pathamp1000.size(); i++) {
@@ -799,7 +839,7 @@ public class SensorNetwork {
                     Link link = treeMapamp1000r.get("(" + tail + ", " + head + ")");
 
                     costamp1000 += link.getCost();
-                    amp1000capacities.add(link.getCapacity());          
+      
                 }
                 //amp10000
                 for (int i = 1; i <pathamp10000.size(); i++) {
@@ -815,37 +855,16 @@ public class SensorNetwork {
                     Link link = treeMapamp10000r.get("(" + tail + ", " + head + ")");
 
                     costamp10000 += link.getCost();
-                    amp10000capacities.add(link.getCapacity());          
+         
                 } 
             
-                //calculate capa
-                double capacity = 0;
-                double amp1capacity = 0;
-                double amp10capacity = 0;
-                double amp1000capacity = 0;
-                double amp10000capacity = 0;
+
                 
-                if (capacities != null) {
-                	capacity = Collections.min(capacities);
-                }
-                if (amp1capacities != null) {
-                	amp1capacity = Collections.min(amp1capacities);
-                }
-                if (amp10capacities != null) {
-                	amp10capacity = Collections.min(amp10capacities);
-                }
-                if (amp1000capacities != null) {
-                	amp1000capacity = Collections.min(amp1000capacities);
-                }
-                if (amp10000capacities != null) {
-                	amp10000capacity = Collections.min(amp10000capacities);
-                }
-                
-                Path newPath = new Path(path, cost, capacity);
-                Path newPathamp1 = new Path(pathamp1, costamp1, amp1capacity);
-                Path newPathamp10 = new Path(pathamp10, costamp10, amp10capacity);
-                Path newPathamp1000 = new Path(pathamp1000, costamp1000, amp1000capacity);
-                Path newPathamp10000 = new Path(pathamp10000, costamp10000, amp10000capacity);
+                Path newPath = new Path(path, cost);
+                Path newPathamp1 = new Path(pathamp1, costamp1);
+                Path newPathamp10 = new Path(pathamp10, costamp10);
+                Path newPathamp1000 = new Path(pathamp1000, costamp1000);
+                Path newPathamp10000 = new Path(pathamp10000, costamp10000);
                 
                 paths4.add(newPath);
                 pathsamp1.add(newPathamp1);
@@ -904,9 +923,6 @@ public class SensorNetwork {
                 						if ((newPathamp1.getPath().get(k-1) == newPath.getPath().get(k-1))) {
                 							contsame = contsame+1;
                 						} 
-                						/*if ((newPathamp10000.getPath().get(k-1) == changenode)) {
-                							checkinamp10000 = 1;
-                						} */
                 					}
                 				}
                 				if (contsame == newPathamp1.getPath().size()) {
@@ -918,7 +934,7 @@ public class SensorNetwork {
                 		}
                 	}
                 }
-                
+             
                 //amp10
                 for(int i=1; i < newPathamp10.getPath().size(); i++) {
                 	int tail = 0, head = 0, contsame = 1;
@@ -941,9 +957,6 @@ public class SensorNetwork {
                 						if ((newPathamp10.getPath().get(k-1) == newPath.getPath().get(k-1))) {
                 							contsame = contsame+1;
                 						} 
-                						/*if ((newPathamp10000.getPath().get(k-1) == changenode)) {
-                							checkinamp10000 = 1;
-                						} */
                 					}
                 				}
                 				if (contsame == newPathamp10.getPath().size()) {
@@ -978,9 +991,6 @@ public class SensorNetwork {
                 						if ((newPathamp1000.getPath().get(k-1) == newPath.getPath().get(k-1))) {
                 							contsame = contsame+1;
                 						} 
-                						/*if ((newPathamp10000.getPath().get(k-1) == changenode)) {
-                							checkinamp10000 = 1;
-                						} */
                 					}
                 				}
                 				if (contsame == newPathamp1000.getPath().size()) {
@@ -1015,9 +1025,6 @@ public class SensorNetwork {
                 						if ((newPathamp10000.getPath().get(k-1) == newPath.getPath().get(k-1))) {
                 							contsame = contsame+1;
                 						} 
-                						/*if ((newPathamp10000.getPath().get(k-1) == changenode)) {
-                							checkinamp10000 = 1;
-                						} */
                 					}
                 				}
                 				if (contsame == newPathamp10000.getPath().size()) {
@@ -1030,9 +1037,9 @@ public class SensorNetwork {
                 	}
                 }
             }
-        }
+        }*/
         
-//this loop is to remove nodes to calculate total cost without the target node
+/*//this loop is to remove nodes to calculate total cost without the target node
         
         //copy since don't want to remove to original nodes
         for (Map.Entry<Integer, Axis> entry : nodes.entrySet()) {
@@ -1120,9 +1127,9 @@ public class SensorNetwork {
         DijkstraFind finderamp10re = new DijkstraFind(graphamp10re);
         DijkstraFind finderamp1000re = new DijkstraFind(graphamp1000re);
         DijkstraFind finderamp10000re = new DijkstraFind(graphamp10000re);
-
+        */
         
-        //since one storage node is removed, need to create new a storage node set
+        /*//since one storage node is removed, need to create new a storage node set
         storageNodes2 = new int[numberOfNodes-numberOfDG-1]; 
         //value q is the value match with the nodes2 (after delete node)
         int q = 0; 
@@ -1134,9 +1141,9 @@ public class SensorNetwork {
             	q++;
             	i = i - 1;
             }
-        }
+        }*/
         
-        //start to calculate the cost without the target node
+        /*//start to calculate the cost without the target node
         for(int dg: dataGens){
             for(int sn: storageNodes2) {
                 ArrayList<Integer> path = finder2.shortestPath(dg, sn, numberOfDG);
@@ -1150,19 +1157,10 @@ public class SensorNetwork {
                 double amp10cost = 0;
                 double amp1000cost = 0;
                 double amp10000cost = 0;
-                double capacity = 0;
-                double amp1capacity = 0;
-                double amp10capacity = 0;
-                double amp1000capacity = 0;
-                double amp10000capacity = 0;
+
+
                 
-                ArrayList<Double> capacities = new ArrayList<>();
-                ArrayList<Double> amp1capacities = new ArrayList<>();
-                ArrayList<Double> amp10capacities = new ArrayList<>();
-                ArrayList<Double> amp1000capacities = new ArrayList<>();
-                ArrayList<Double> amp10000capacities = new ArrayList<>();
-                
-                //calculate cost and capa
+                //calculate cost
                 for (int i = 1; i <path.size(); i++) {
                     int tail, head;
                     tail = path.get(i-1);
@@ -1175,7 +1173,7 @@ public class SensorNetwork {
                    
                     Link link = treeMap3.get("(" + tail + ", " + head + ")");
                     cost += link.getCost();
-                    capacities.add(link.getCapacity());          
+       
                 }
                 //amp1
                 for (int i = 1; i <pathamp1.size(); i++) {
@@ -1190,7 +1188,7 @@ public class SensorNetwork {
                    
                     Link link = treeMapamp1rr.get("(" + tail + ", " + head + ")");
                     amp1cost += link.getCost();
-                    amp1capacities.add(link.getCapacity());          
+         
                 }
                 //amp10
                 for (int i = 1; i <pathamp10.size(); i++) {
@@ -1205,8 +1203,7 @@ public class SensorNetwork {
                    
                     Link link = treeMapamp10rr.get("(" + tail + ", " + head + ")");
 
-                    amp10cost += link.getCost();
-                    amp10capacities.add(link.getCapacity());          
+                    amp10cost += link.getCost();       
                 }
                 //amp1000
                 for (int i = 1; i <pathamp1000.size(); i++) {
@@ -1221,8 +1218,7 @@ public class SensorNetwork {
                    
                     Link link = treeMapamp1000rr.get("(" + tail + ", " + head + ")");
 
-                    amp1000cost += link.getCost();
-                    amp1000capacities.add(link.getCapacity());          
+                    amp1000cost += link.getCost();         
                 }
                 //amp10000
                 for (int i = 1; i <pathamp10000.size(); i++) {
@@ -1237,32 +1233,14 @@ public class SensorNetwork {
                    
                     Link link = treeMapamp10000rr.get("(" + tail + ", " + head + ")");
 
-                    amp10000cost += link.getCost();
-                    amp10000capacities.add(link.getCapacity());          
-                }
-            
-                
-                if (capacities != null) {
-                	capacity = Collections.min(capacities);
-                }
-                if (amp1capacities != null) {
-                	amp1capacity = Collections.min(amp1capacities);
-                }
-                if (amp10capacities != null) {
-                	amp10capacity = Collections.min(amp10capacities);
-                }
-                if (amp1000capacities != null) {
-                	amp1000capacity = Collections.min(amp1000capacities);
-                }
-                if (amp10000capacities != null) {
-                	amp10000capacity = Collections.min(amp10000capacities);
+                    amp10000cost += link.getCost();         
                 }
                 
-                Path newPath = new Path(path, cost, capacity);
-                Path newPathamp1 = new Path(pathamp1, amp1cost, amp1capacity);
-                Path newPathamp10 = new Path(pathamp10, amp10cost, amp10capacity);
-                Path newPathamp1000 = new Path(pathamp1000, amp1000cost, amp1000capacity);
-                Path newPathamp10000 = new Path(pathamp10000, amp10000cost, amp10000capacity);
+                Path newPath = new Path(path, cost);
+                Path newPathamp1 = new Path(pathamp1, amp1cost);
+                Path newPathamp10 = new Path(pathamp10, amp10cost);
+                Path newPathamp1000 = new Path(pathamp1000, amp1000cost);
+                Path newPathamp10000 = new Path(pathamp10000, amp10000cost);
                 
                 paths3.add(newPath);
                 pathsamp1re.add(newPathamp1);
@@ -1367,8 +1345,9 @@ public class SensorNetwork {
                 }
                 
             }
-        }
-
+        }*/
+        
+        /*print the information energy costs
         pay = Cvi - (Cv - fakeCi);
         payamp1 = Cviamp1 - (Cvamp1 - fakeCiamp1);
         payamp10 = Cviamp10 - (Cvamp10 - fakeCiamp10);
@@ -1411,11 +1390,12 @@ public class SensorNetwork {
         System.out.println("the utility amp1000 (payment - its true cost) is:" + fix.format(utamp1000));
         System.out.println("the utility amp10000 (payment - its true cost) is:" + fix.format(utamp10000));
         System.out.println();
-        System.out.println("the electricity cost (receive + send) of this node is:" + fix.format(linkelec));
+        System.out.println("the true electricity cost (receive + send) of this node is:" + fix.format(linkelec));
         System.out.println("the total energy cost of this path is:" + fix.format(Cv));
-    	}//end for
-    	}//end else
-        
+    	//}//end for
+    	*/
+    	//}//end else
+       
 
     	
 /*      //for generating input file for min cost program
@@ -1523,7 +1503,7 @@ public class SensorNetwork {
 			System.out.println(list);
 		}
 		
-		/*
+		
 		//Draw first sensor network graph
 		SensorNetworkGraph graph = new SensorNetworkGraph(dataGens);
 		graph.setGraphWidth(width);
@@ -1533,7 +1513,7 @@ public class SensorNetwork {
 		graph.setPreferredSize(new Dimension(960, 800));
 		Thread graphThread = new Thread(graph);
 		graphThread.start();
-		*/ 
+		
 	}
 	
 	//for the new graphic (delete nodes to test)
@@ -1609,14 +1589,15 @@ public class SensorNetwork {
 	}
 	
 	void populateNodes(int nodeCount, double width, double height) {
-		Random random = new Random(555);
+		// if user want to fix the graphic, enter a number in Random()
+		Random random = new Random();
 		
 		for(int i = 1; i <= nodeCount; i++) {
 			Axis axis = new Axis();
 			int scale = (int) Math.pow(10, 1);
 			double xAxis =(0 + random.nextDouble() * (width - 0));
 			double yAxis = 0 + random.nextDouble() * (height - 0);
-			int capa = ((numberOfDG * numberOfDataItemsPerDG) / (numberOfNodes - numberOfDG)) + 10;
+			int capa = random.nextInt(10) + 1;
 			
 			xAxis = (double)Math.floor(xAxis * scale) / scale;
 			yAxis = (double)Math.floor(yAxis * scale) / scale;
@@ -1651,12 +1632,14 @@ public class SensorNetwork {
 				
 				double distance =  Math.sqrt(((xAxis1-xAxis2)*(xAxis1-xAxis2)) + ((yAxis1-yAxis2)*(yAxis1-yAxis2)));
 				
+				double energy = Double.POSITIVE_INFINITY;
+				
 				if(distance <= tr) {
-					linkstest.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost(distance), 0));
-					linksamp1.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost1(distance), 0));
-					linksamp10.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost10(distance), 0));
-					linksamp1000.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost1000(distance), 0));
-					linksamp10000.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost10000(distance), 0));
+					linkstest.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost(distance), energy));
+					linksamp1.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost1(distance), energy));
+					linksamp10.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost10(distance), energy));
+					linksamp1000.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost1000(distance), energy));
+					linksamp10000.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost10000(distance), energy));
 					Set<Integer> tempList = adjList.get(node1);
 					tempList.add(node2);
 					adjList.put(node1, tempList);
@@ -1665,9 +1648,9 @@ public class SensorNetwork {
 					tempList.add(node1);
 					adjList.put(node2, tempList);
 					if (node1 > node2){
-                        links.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 1), distance, getCost(distance), 0));
+                        links.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 1), distance, getCost(distance), energy));
 					} else {
-                    	links.put(new String("(" + node1 + ", " + node2 + ")"), new Link(new Edge(node1, node2, 1), distance, getCost(distance), 0));
+                    	links.put(new String("(" + node1 + ", " + node2 + ")"), new Link(new Edge(node1, node2, 1), distance, getCost(distance), energy));
 					}
 					
 		
@@ -1695,7 +1678,7 @@ public class SensorNetwork {
 				
 				Axis axis2 = nodes2.get(node2);
 				
-				if((node1 == node2) || ((node1 <= numberOfDG) && (node2 <= numberOfDG))) {
+				if(node1 == node2) {
 					continue;
 				}
 				double xAxis1 = axis1.getxAxis();
@@ -1706,6 +1689,8 @@ public class SensorNetwork {
 				
 				double distance =  Math.sqrt(((xAxis1-xAxis2)*(xAxis1-xAxis2)) + ((yAxis1-yAxis2)*(yAxis1-yAxis2)));
 				
+				double energy = Double.POSITIVE_INFINITY;
+				
 				if(distance <= tr) {
 					Set<Integer> tempList = adjList.get(node1);
 					tempList.add(node2);
@@ -1715,9 +1700,9 @@ public class SensorNetwork {
 					tempList.add(node1);
 					adjList.put(node2, tempList);
 					if (node1 > node2){
-						links2.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 1), distance, getCost(distance), 0));
+						links2.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 1), distance, getCost(distance), energy));
                     } else {
-                    	links2.put(new String("(" + node1 + ", " + node2 + ")"), new Link(new Edge(node1, node2, 1), distance, getCost(distance), 0));
+                    	links2.put(new String("(" + node1 + ", " + node2 + ")"), new Link(new Edge(node1, node2, 1), distance, getCost(distance), energy));
                     }
 				}
 			}
@@ -1754,12 +1739,14 @@ public class SensorNetwork {
 				
 				double distance =  Math.sqrt(((xAxis1-xAxis2)*(xAxis1-xAxis2)) + ((yAxis1-yAxis2)*(yAxis1-yAxis2)));
 				
+				double energy = Double.POSITIVE_INFINITY;
+				
 				if(distance <= tr) {
-					links3.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost(distance), 0));
-					linksamp1re.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost1(distance), 0));
-					linksamp10re.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost10(distance), 0));
-					linksamp1000re.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost1000(distance), 0));
-					linksamp10000re.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost10000(distance), 0));
+					links3.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost(distance), energy));
+					linksamp1re.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost1(distance), energy));
+					linksamp10re.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost10(distance), energy));
+					linksamp1000re.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost1000(distance), energy));
+					linksamp10000re.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 0), distance, getCost10000(distance), energy));
 					Set<Integer> tempList = adjList.get(node1);
 					tempList.add(node2);
 					adjList.put(node1, tempList);
@@ -1768,9 +1755,9 @@ public class SensorNetwork {
 					tempList.add(node1);
 					adjList.put(node2, tempList);
 					if (node1 > node2){
-						links2.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 1), distance, getCost(distance), 0));
+						links2.put(new String("(" + node2 + ", " + node1 + ")"), new Link(new Edge(node2, node1, 1), distance, getCost(distance), energy));
                     } else {
-                    	links2.put(new String("(" + node1 + ", " + node2 + ")"), new Link(new Edge(node1, node2, 1), distance, getCost(distance), 0));
+                    	links2.put(new String("(" + node1 + ", " + node2 + ")"), new Link(new Edge(node1, node2, 1), distance, getCost(distance), energy));
                     }
 				}
 			}
